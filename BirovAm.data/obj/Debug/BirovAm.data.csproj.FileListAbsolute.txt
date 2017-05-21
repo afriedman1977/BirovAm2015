@@ -1,0 +1,10 @@
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\BirovAm.data.dll.config
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\BirovAm.data.dll
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\BirovAm.data.pdb
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\EntityFramework.dll
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\EntityFramework.SqlServer.dll
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\EntityFramework.xml
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\bin\Debug\EntityFramework.SqlServer.xml
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\obj\Debug\BirovAm.data.dll
+c:\users\pessie\documents\visual studio 2015\Projects\BirovAm2015\BirovAm.data\obj\Debug\BirovAm.data.pdb
+C:\Users\pessie\Documents\Visual Studio 2015\Projects\BirovAm2015\BirovAm.data\obj\Debug\BirovAm.data.csprojResolveAssemblyReference.cache

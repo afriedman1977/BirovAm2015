@@ -1,0 +1,71 @@
+﻿@using BirovAm.data;
+@model List<Category>
+
+<div style="margin:20px;text-align:center"><h1>Categories</h1></div>
+<div class="row">
+    <div class="col-md-4 col-md-offset-4" style="margin-bottom:10px">
+        <button class="btn btn-primary btn-block" id="add-category">Add Category</button>
+    </div>
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <tr>
+        <th>Category Name</th>
+        <th>Category Description</th>
+        <th>Actions</th>
+    </tr>
+    @foreach (Category c in Model)
+    {
+        <tr data-category-id="@c.CategoryID">
+            <td>@c.CategoryName</td>
+            <td>@c.CategoryDescription</td>
+            <td>
+                <div class="row">
+                    <div class="col-md-3" style="margin-left:-5px">
+                        <button class="btn  btn-warning editCategory">Edit</button>
+                    </div>
+                    <div class="col-md-3 ">
+                        <form action="/Products/DeleteCategory" method="POST" id="delete-form">
+                            <input type="hidden" name="id" value="@c.CategoryID" />
+                            <button class="btn  btn-danger delete">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+</table>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="add-category-modal">
+    <div class="modal-dialog">
+        <form method="POST" action="/Products/AddCategory">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title-category">Add Category</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="style-number">Category Name</label>
+                        <input type="text" class="form-control" name="CategoryName" id="category-name" placeholder="Category Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="style-number">Category Description</label>
+                        <input type="text" class="form-control" name="CategoryDescription" id="category-description" placeholder="Category Description">
+                    </div>
+                    <input type="hidden" id="category-id" value="" name="CategoryID" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" id="submit-add-category">Add Category</button>
+                    <button class="btn btn-primary" id="submit-edit-category" formaction="/Products/EditCategory">Edit Category</button>
+                </div>
+            </div>
+        </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+@section scripts{
+    <script src="~/Scripts/productsIndex.js"></script>
+}
+

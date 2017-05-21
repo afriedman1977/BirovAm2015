@@ -1,0 +1,48 @@
+﻿@using BirovAm.data;
+@using BirovAm2015.Models;
+@model EnterSizesViewModel
+
+
+<div style="text-align:center"><h3>Enter info For @Model.Product.StyleNumber</h3></div>
+
+<form method="POST" action="/Products/SubmitSizes">
+    <div class="row">
+        @for (int x = 0; x < Model.Sizes.Count; x++)
+        {
+            <input type="hidden" name="ps[@x].ProductID" value="@Model.Product.ProductID" />
+            <input type="hidden" name="ps[@x].SizeID" value="@Model.Sizes[x].SizeID" />
+            if (Model.Product.ProductsSizes.Any(s => s.SizeID == Model.Sizes[x].SizeID))
+            {
+                <div class="col-md-2">
+                    <input type="checkbox" name="ps[@x].Included" value="true" checked />@Model.Sizes[x].Size1
+                    <span>-------------------</span>
+                </div>
+                <div class="col-md-3" style="margin-left:-10px">
+                    <input type="text" class="input-sm" name="ps[@x].Stock" value="@Model.Product.ProductsSizes.First(ps => ps.SizeID == Model.Sizes[x].SizeID).Stock">
+                </div>
+            }
+            else
+            {
+                <div class="col-md-2">
+                    <input type="checkbox" name="ps[@x].Included" value="true" />@Model.Sizes[x].Size1
+                    <span>-------------------</span>
+                </div>
+                <div class="col-md-3" style="margin-left:-10px">
+                    <input type="text" class="input-sm" name="ps[@x].Stock" placeholder="Stock">
+                </div>
+            }
+            if ((x + 1) % 2 == 0)
+            {
+                <div class="col-md-12">
+
+                    <hr />
+                </div>
+            }
+        }
+    </div>
+    <div class="row" style="margin:30px">
+        <div class="col-md-4 col-md-offset-4">
+            <button class="btn btn-primary btn-block">Submit</button>
+        </div>
+    </div>
+</form>

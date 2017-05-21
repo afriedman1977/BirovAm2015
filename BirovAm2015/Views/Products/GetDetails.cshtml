@@ -1,0 +1,23 @@
+﻿@using BirovAm.data;
+@using BirovAm2015.Models;
+@model Product
+
+<div style="margin:20px;text-align:center"><h1>Details For @Model.StyleNumber</h1></div>
+<div style="text-align:center"><h4>Sound File: </h4><audio src="~/SoundFiles/@Model.SoundFilePath" controls></audio></div>
+<div class="row">
+    <div class="col-lg-4 col-lg-offset-4">
+        <table class="table table-bordered table-striped table-hover">
+            <tr>
+                <th>Size</th>
+                <th>Quantity</th>
+            </tr>
+            @foreach (ProductsSize s in Model.ProductsSizes.OrderBy(x => x.Size.Size1))
+            {
+                <tr>
+                    <td>@s.Size.Size1</td>
+                    <td>@s.Stock</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

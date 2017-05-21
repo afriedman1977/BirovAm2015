@@ -1,0 +1,126 @@
+﻿@using BirovAm.data;
+@using BirovAm2015.Models;
+@model ProductsIndexModel
+
+<div class="row" style="margin:30px">
+    <div class="col-md-2">
+        <a href="/Products/Categories" class="btn btn-primary btn-block">Categories</a>
+    </div>
+    <div class="col-md-4 col-md-offset-2">
+        <button class="btn btn-primary btn-block" id="add-product">Add Product</button>
+    </div>
+    <div class="col-md-2 col-md-offset-2">
+        <a href="/Products/Sizes" class="btn btn-primary btn-block" id="add-size">Sizes</a>
+    </div>
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <tr>
+        <th>Product Code</th>
+        <th>Style No.</th>
+        <th>Brand</th>
+        <th>Description</th>
+        <th>Sizes</th>
+        <th>Price</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (Product p in Model.Products)
+    {
+        <tr data-product-id="@p.ProductID">
+            <td>@p.ProductCode</td>
+            <td>@p.StyleNumber</td>
+            <td>@p.Brand</td>
+            <td>@p.Description</td>
+            <td>
+                @foreach (ProductsSize s in p.ProductsSizes.OrderBy(x => x.Size.Size1))
+                {
+                    @s.Size.Size1<span>,</span>
+                }
+            </td>
+            <td>@p.Price.ToString("C")</td>
+            <td>
+                <div class="row">
+                    <div class="col-md-1" style="margin-left:-5px">
+                        <button class="btn btn-sm btn-warning editProduct">Edit</button>
+                    </div>
+                    <div class="col-md-1 col-md-offset-1">
+                        <a href="/Products/GetDetails?id=@p.ProductID" class="btn btn-sm btn-info details">Details</a>
+                    </div>
+                    <div class="col-md-1 col-md-offset-2">
+                        <form action="/Products/DeleteProduct" method="POST" id="delete-form">
+                            <input type="hidden" name="id" value="@p.ProductID" />
+                            <button class="btn btn-sm btn-danger delete">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+</table>
+
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="add-product-modal">
+    <div class="modal-dialog">
+        <form method="POST" action="/Products/AddProduct" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="style-number">Product Code</label>
+                        <input type="text" class="form-control" name="ProductCode" id="product-code" placeholder="Product Code">
+                    </div>
+                    <div class="form-group">
+                        <label for="style-number">Style No.</label>
+                        <input type="text" class="form-control" name="styleNumber" id="style-number" placeholder="Style No.">
+                    </div>
+                    <div class="form-group">
+                        <label for="brand">Brand</label>
+                        <input type="text" class="form-control" name="brand" id="brand" placeholder="Brand">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" class="form-control" name="description" id="description" placeholder="Description">
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <input type="text" class="form-control" name="price" id="price" placeholder="Price">
+                    </div>
+                    <div class="form-group ">
+                        <label for="Image">Sound File</label>
+                        <input type="file" class="form-control" name="SoundFile" >
+                    </div>
+
+                    <input type="hidden" id="product-id" value="" name="ProductID" />
+                    <input type="hidden" id="sound-file" value="" name="SoundFilePath"/>
+                    <div class="form-inline row">
+                        <div class="form-group col-md-4">
+                            <label for="category">Category</label>
+                            <select id="category" name="CategoryID">
+                                @foreach (Category c in Model.Categories)
+                                {
+                                    <option value="@c.CategoryID" data-category-id="@c.CategoryID">@c.CategoryName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" id="submit-add">Add Product</button>
+                    <button class="btn btn-primary" id="submit-edit" formaction="/Products/EditProduct">Edit Product</button>
+
+                </div>
+            </div>
+        </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts{
+    <script src="~/Scripts/productsIndex.js"></script>
+}
+
+
