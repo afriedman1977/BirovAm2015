@@ -26,8 +26,8 @@ namespace BirovAm2015.Controllers
                 // .Play("/Sound_Files/PracticeTwilio2.wav")
                 .Say("Welcome To the Berov am clothing Hotline. press 1 to start shopping, "
                 + "press 2 to review a previous order, press 3 to hear deadline and pickup location, "
-                + "press 4 to leave a message.",  voice : "alice", language: "en-GB"));
-            response.Redirect("/Welcome/Welcome",method: "GET");
+                + "press 4 to leave a message.", voice: "alice", language: "en-GB"));
+            response.Redirect("/Welcome/Welcome", method: "GET");
             return TwiML(response);
         }
 
@@ -42,7 +42,7 @@ namespace BirovAm2015.Controllers
             {
                 return TwiML(new VoiceResponse().Redirect("/Review/SearchForOrder"));
             }
-            else if(digits == "3")
+            else if (digits == "3")
             {
                 return TwiML(new VoiceResponse().Redirect("/Welcome/HearInfo"));
             }
@@ -63,30 +63,29 @@ namespace BirovAm2015.Controllers
                 Customer customer = repo.FindCustomerByPhoneNumber(From.Substring(2));
                 if (customer != null)
                 {
-                    //ReviewEditManager REManager = new ReviewEditManager(Properties.Settings.Default.constr);
-                    //Order order = REManager.GetAllOrders().Where(o => o.CustomerID == customer.CustomerID).FirstOrDefault();
-                    //if (order != null)
-                    //{
-                    //    response.Say("we found an order associated with this phone number, you will now be redirected to the review option");
-                    //    Session["customerId"] = customer.CustomerID;
-                    //    Session["orderId"] = order.OrderID;
-                    //    response.Redirect("/Review/ReviewOptions");
-                    //    return TwiML(response);
-                    //}
-                    //else
-                    //{
-                    Order o = new Order
+                    Order order = repo.GetOrderByCustomerId(customer.CustomerID);
+                    if (order != null)
                     {
-                        CustomerID = customer.CustomerID,
-                        OrderDate = DateTime.Now,
-                        TotalQuantity = 0,
-                        TotalCost = 0,
-                        TotalAmountPaid = 0
-                    };
-                    repo.CreateOrder(o);
-                    Session["orderId"] = o.OrderID;
-                    return ChooseItem();
-                    //}
+                        response.Say("we found an order associated with this phone number, you will now be redirected to the review option");
+                        Session["customerId"] = customer.CustomerID;
+                        Session["orderId"] = order.OrderID;
+                        response.Redirect("/Review/ReviewOptions");
+                        return TwiML(response);
+                    }
+                    else
+                    {
+                        Order o = new Order
+                        {
+                            CustomerID = customer.CustomerID,
+                            OrderDate = DateTime.Now,
+                            TotalQuantity = 0,
+                            TotalCost = 0,
+                            TotalAmountPaid = 0
+                        };
+                        repo.CreateOrder(o);
+                        Session["orderId"] = o.OrderID;
+                        return ChooseItem();
+                    }
                 }
                 else
                 {
@@ -97,7 +96,7 @@ namespace BirovAm2015.Controllers
             else
             {
                 response.Gather(new Gather(action: "/Welcome/VerifyNumber", numDigits: 10)
-                    .Say("Please enter your 10 digit Phone Number",  voice: "alice", language: "en-GB"));
+                    .Say("Please enter your 10 digit Phone Number", voice: "alice", language: "en-GB"));
                 response.Redirect("/Welcome/GetCustomer");
                 return TwiML(response);
             }
@@ -134,18 +133,17 @@ namespace BirovAm2015.Controllers
                 Customer customer = repo.FindCustomerByPhoneNumber(phoneNumber);
                 if (customer != null)
                 {
-                    //ReviewEditManager REManager = new ReviewEditManager(Properties.Settings.Default.constr);
-                    //Order order = REManager.GetAllOrders().Where(o => o.CustomerID == customer.CustomerID).FirstOrDefault();
-                    //if (order != null)
-                    //{
-                    //    response.Say("we found an order associated with this phone number, you will now be redirected to the review option");
-                    //    Session["customerId"] = customer.CustomerID;
-                    //    Session["orderId"] = order.OrderID;
-                    //    response.Redirect("/Review/ReviewOptions");
-                    //    return TwiML(response);
-                    //}
-                    //else
-                    //{
+                    Order order = repo.GetOrderByCustomerId(customer.CustomerID);
+                    if (order != null)
+                    {
+                        response.Say("we found an order associated with this phone number, you will now be redirected to the review option");
+                        Session["customerId"] = customer.CustomerID;
+                        Session["orderId"] = order.OrderID;
+                        response.Redirect("/Review/ReviewOptions");
+                        return TwiML(response);
+                    }
+                    else
+                    {
                         Order o = new Order
                         {
                             CustomerID = customer.CustomerID,
@@ -154,15 +152,15 @@ namespace BirovAm2015.Controllers
                             TotalCost = 0,
                             TotalAmountPaid = 0
                         };
-                    repo.CreateOrder(o);
-                    Session["orderId"] = o.OrderID;
-                    return ChooseItem();
-                    //}
+                        repo.CreateOrder(o);
+                        Session["orderId"] = o.OrderID;
+                        return ChooseItem();
+                    }
                 }
                 else
                 {
                     response.Say("Please record your name and address after the beep. press the pound key when you are done", voice: "alice", language: "en-GB");
-                    response.Record(action: "/Welcome/CaptureRecording?phoneNumber=" + phoneNumber,  finishOnKey: "#");
+                    response.Record(action: "/Welcome/CaptureRecording?phoneNumber=" + phoneNumber, finishOnKey: "#");
                     return TwiML(response);
                 }
             }
@@ -221,8 +219,8 @@ namespace BirovAm2015.Controllers
         public TwiMLResult RecordMessage()
         {
             var response = new VoiceResponse();
-            response.Say("Please record your message after the beep. press the pound key when you are done", voice: "alice", language:"en-GB" );
-            response.Record( action: "/Welcome/SaveMessage", finishOnKey:"#", timeout: 10);
+            response.Say("Please record your message after the beep. press the pound key when you are done", voice: "alice", language: "en-GB");
+            response.Record(action: "/Welcome/SaveMessage", finishOnKey: "#", timeout: 10);
             return TwiML(response);
         }
 

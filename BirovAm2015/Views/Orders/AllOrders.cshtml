@@ -1,0 +1,42 @@
+﻿@using BirovAm.data;
+@model List<Order>
+<h2>AllOrders</h2>
+<div class="row" style="margin-bottom:10px">
+    <div class="col-md-offset-5">
+        <input type="text" id="search" placeholder="Phone Number" />
+        <button class="btn btn-info" id="clear">Clear</button>
+    </div>
+
+</div>
+
+<table class="table table-bordered table-striped table-hover" id="orders">
+    <tr>
+        <th>Order Number</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+        <th>Order Date</th>
+        <th>Total Cost</th>
+        <th>Actions</th>
+    </tr>
+    @foreach (Order o in Model)
+    {
+        <tr>
+            <td>@o.OrderID</td>
+            <td>@o.Customer.FirstName</td>
+            <td>@o.Customer.LastName</td>
+            <td>@o.Customer.PhoneNumber</td>
+            <td>@o.OrderDate</td>
+            <td>@o.TotalCost</td>
+            <td>
+                <a href="/Orders/OrderDetails?orderId=@o.OrderID" class="btn btn-primary">Order Details</a>
+                <a href="/Orders/PrintInvoice?orderId=@o.OrderID" class="btn btn-success">Print</a>
+            </td> 
+        </tr>
+    }
+</table>
+@section scripts{
+    <script src="~/Scripts/AllOrders.js"></script>
+}
+
+

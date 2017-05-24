@@ -17,6 +17,14 @@ namespace BirovAm.data
             }
         }
 
+        public Order GetOrderByCustomerId(int custId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                return ctx.Orders.Include(o => o.Customer).Where(o => o.Customer.CustomerID == custId).FirstOrDefault();
+            }
+        }
+
         public void AddCustomer(Customer c)
         {
             using (var ctx = new BirovAmContext())
@@ -52,6 +60,14 @@ namespace BirovAm.data
             }
         }
 
+        public OrderDetail GetOrderDetailByOrderDetailId(int odId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                return ctx.OrderDetails.Include(d => d.Product).Include(d => d.Size).Where(d => d.OrderDetailID == odId).FirstOrDefault();
+            }
+        }
+
         public bool DoesSizeExist(string sizeCode)
         {
             using (var ctx = new BirovAmContext())
@@ -73,13 +89,32 @@ namespace BirovAm.data
             }
         }
 
+        public bool DoesItemExistInOrder(int orderId, int pId, int sId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                return ctx.OrderDetails.Include(d => d.Order).Any(d => d.Order.OrderID == orderId && d.ProductID == pId && d.SizeID == sId);
+            }
+        }
+
         public void AddSizeToOrderDetail(int orderDetailId, int sizeId)
         {
             using (var ctx = new BirovAmContext())
             {
                 OrderDetail od = ctx.OrderDetails.Where(o => o.OrderDetailID == orderDetailId).FirstOrDefault();
                 od.SizeID = sizeId;
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == sizeId).FirstOrDefault();
+                ps.Stock -= 1;
                 ctx.SaveChanges();
+            }
+        }
+
+        public bool OutOfStock(int pId, int sId, int qty)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == pId && p.SizeID == sId).FirstOrDefault();
+                return ps.Stock - qty <= 5; 
             }
         }
 
@@ -90,6 +125,8 @@ namespace BirovAm.data
                 OrderDetail od = ctx.OrderDetails.Include(or => or.Product).Include(or => or.Order).Where(or => or.OrderDetailID == orderDetailId).FirstOrDefault();
                 od.Quantity = quantity;
                 od.Price = od.Product.Price * od.Quantity;
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
+                ps.Stock -= (quantity - 1);
                 ctx.SaveChanges();
                 od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Price);
                 od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Quantity);
@@ -102,6 +139,18 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 ctx.Messages.Add(m);
+                ctx.SaveChanges();
+            }
+        }
+
+        public void DeleteOrderDetail(int odId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                OrderDetail od = ctx.OrderDetails.Where(d => d.OrderDetailID == odId).FirstOrDefault();
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
+                ps.Stock += od.Quantity.Value;
+                ctx.Entry(od).State = EntityState.Deleted;
                 ctx.SaveChanges();
             }
         }

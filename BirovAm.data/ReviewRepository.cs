@@ -25,12 +25,22 @@ namespace BirovAm.data
             }
         }
 
+        public OrderDetail GetOrderDetailByOrderDetailId(int odId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                return ctx.OrderDetails.Include(d => d.Product).Include(d => d.Size).Where(d => d.OrderDetailID == odId).FirstOrDefault();
+            }
+        }
+
         public void DeleteOrderDetail(int odId)
         {
             using (var ctx = new BirovAmContext())
             {
                 OrderDetail od = ctx.OrderDetails.Where(d => d.OrderDetailID == odId).FirstOrDefault();
                 od.DeleteFlag = true;
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
+                ps.Stock += od.Quantity.Value;
                 ctx.SaveChanges();
             }
         }
@@ -42,10 +52,22 @@ namespace BirovAm.data
                 OrderDetail od = ctx.OrderDetails.Include(d => d.Order).Include(d => d.Product).Where(d => d.OrderDetailID == odId).FirstOrDefault();
                 od.Quantity = qty;
                 od.Price = od.Product.Price * od.Quantity;
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
+                ps.Stock += (od.Quantity.Value - qty);
                 ctx.SaveChanges();
                 od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Price);
                 od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Quantity);
                 ctx.SaveChanges();
+            }
+        }
+
+        public bool OutOfStock(int odId, int qty, int sId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                OrderDetail od = ctx.OrderDetails.Include(d => d.Order).Include(d => d.Product).Where(d => d.OrderDetailID == odId).FirstOrDefault();
+                ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && (sId == 0 ? p.SizeID == od.SizeID : p.SizeID == sId)).FirstOrDefault();
+                return qty > 0 ? (ps.Stock + (od.Quantity.Value - qty)) > 5 : (ps.Stock - od.Quantity.Value) > 5;
             }
         }
 
@@ -71,7 +93,17 @@ namespace BirovAm.data
             }
         }
 
-        public void UpdateSize(int sId,int odId)
+        public bool DoesItemExistInOrder(string sizeCode, int odId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                Size s = ctx.Sizes.Where(x => x.SizeCode == sizeCode).FirstOrDefault();
+                OrderDetail od = ctx.OrderDetails.Include(d => d.Product).Where(d => d.OrderDetailID == odId).FirstOrDefault();
+                return ctx.OrderDetails.Include(d => d.Order).Any(d => d.Order.OrderID == od.OrderID && d.ProductID == od.Product.ProductID && d.SizeID == s.SizeID);
+            }
+        }
+
+        public void UpdateSize(int sId, int odId)
         {
             using (var ctx = new BirovAmContext())
             {
@@ -85,7 +117,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.OrderDetails.Include(d => d.Product).Where(d => d.OrderID == orderId && d.Product.ProductCode == productCode).ToList();
+                return ctx.OrderDetails.Include(d => d.Product).Include(d => d.Size).Where(d => d.OrderID == orderId && d.Product.ProductCode == productCode && d.DeleteFlag != true).ToList();
             }
         }
 
@@ -93,7 +125,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.OrderDetails.Include(d => d.Product).Include(d => d.Size).Where(d => d.OrderID == oId && d.Product.ProductCode == pCode && d.Size.SizeCode == sCode).FirstOrDefault();
+                return ctx.OrderDetails.Include(d => d.Product).Include(d => d.Size).Where(d => d.OrderID == oId && d.Product.ProductCode == pCode && d.Size.SizeCode == sCode && d.DeleteFlag != true).FirstOrDefault();
             }
         }
     }

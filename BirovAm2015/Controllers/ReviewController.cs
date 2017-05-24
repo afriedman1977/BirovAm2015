@@ -129,7 +129,7 @@ namespace BirovAm2015.Controllers
                 Session["OrderDetailID"] = orderDetails[_index].OrderDetailID;
                 response.Gather(new Gather(action: "/Review/ChooseEdit", numDigits: 1)
                     .Say("you chose " + orderDetails[_index].Quantity + ", " + orderDetails[_index].Product.Description + ", size " + orderDetails[_index].Size.Size1
-                    + " to change the quantity press 1, to change the size press 2, to delete this item from your cart "
+                    + ". to change the quantity press 1, to change the size press 2, to delete this item from your cart "
                     + "press 3, to hear the next item in your cart press 4, to return to the previous menu press 5, to return to "
                     + "the main menu press 6.", voice: "alice", language: "en-US"));
                 response.Redirect("/Review/ReviewEntireOrder");
@@ -151,8 +151,7 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "3")
             {
-                ReviewRepository repo = new ReviewRepository();
-                repo.DeleteOrderDetail((int)Session["OrderDetailID"]);
+                response.Redirect("/review/ChooseDelete");
             }
             else if (digits == "4")
             {
@@ -187,10 +186,19 @@ namespace BirovAm2015.Controllers
         public TwiMLResult ReviewQuantity(string digits)
         {
             var response = new VoiceResponse();
-            response.Gather(new Gather(action: "/Review/ConfirmQuantity?qty=" + int.Parse(digits), numDigits: 1)
-                .Say("you have chosen to update the quantity to, " + digits + " , to enter the quantity again, press 1. to confirm and review the next item in your cart "
-                + "press 2. to confirm and change the size of your item press 3.", voice: "alice", language: "en-US"));
-            response.Redirect("/Review/ReviewQuantity?digits=" + digits);
+            var repo = new ReviewRepository();
+            if (repo.OutOfStock((int)Session["OrderDetailID"], int.Parse(digits), 0))
+            {
+                response.Say("I'm sorry, but there is not enough stock for the quantity you chose, please choose a different amount", voice: "alice", language: "en-US");
+                response.Redirect("/Review/EditQuantity");
+            }
+            else
+            {
+                response.Gather(new Gather(action: "/Review/ConfirmQuantity?qty=" + int.Parse(digits), numDigits: 1)
+                    .Say("you have chosen to update the quantity to, " + digits + " , to enter the quantity again, press 1. to confirm and review the next item in your cart "
+                    + "press 2. to confirm and change the size of your item press 3.", voice: "alice", language: "en-US"));
+                response.Redirect("/Review/ReviewQuantity?digits=" + digits);
+            }
             return TwiML(response);
         }
 
@@ -227,7 +235,7 @@ namespace BirovAm2015.Controllers
         public TwiMLResult EditSize()
         {
             var response = new VoiceResponse();
-            response.Gather(new Gather(action: "/Review/ReviewSize", numDigits: 1)
+            response.Gather(new Gather(action: "/Review/ReviewSize", numDigits: 3)
                     .Say("Please enter a size code", voice: "alice", language: "en-US"));
             response.Redirect("/Review/EditSize");
             return TwiML(response);
@@ -236,9 +244,9 @@ namespace BirovAm2015.Controllers
         public TwiMLResult ReviewSize(string digits)
         {
             var response = new VoiceResponse();
-            SalesRepository repo = new SalesRepository();
+            ReviewRepository repo = new ReviewRepository();
             Size size = repo.FindSizeBySizeCodeForProduct(digits, (int)Session["OrderDetailID"]);
-            if (!repo.DoesSizeExist(digits))
+            if (!repo.DoesSizeExist(digits)) 
             {
                 response.Say("invalid size code, please try again", voice: "alice", language: "en-GB");
                 response.Redirect("/Review/EditSize");
@@ -247,6 +255,19 @@ namespace BirovAm2015.Controllers
             {
                 response.Say("Product not available in this size, please try again", voice: "alice", language: "en-GB");
                 response.Redirect("/Review/EditSize");
+            }
+            else if(repo.DoesItemExistInOrder(digits, (int)Session["OrderDetailID"]))
+            {
+                response.Say("you already have this item in size " + size.Size1 + " in your order, to make changes to that item find it from the review menu "
+                    + " and edit it.");
+                _index++;
+                response.Redirect("/Review/ReviewEntireOrder");
+            }
+            else if(repo.OutOfStock((int)Session["OrderDetailID"], 0, size.SizeID))
+            {
+                response.Say("I'm sorry but you can't change the size of this item, since there is no enough stock in the size you chose", voice: "alice", language: "en-GB");
+                _index++;
+                response.Redirect("/Review/ReviewEntireOrder");
             }
             else
             {
@@ -280,6 +301,42 @@ namespace BirovAm2015.Controllers
             return TwiML(response);
         }
 
+        public TwiMLResult ChooseDelete()
+        {
+            var respone = new VoiceResponse();
+            var repo = new ReviewRepository();
+            OrderDetail od = repo.GetOrderDetailByOrderDetailId((int)Session["OrderDetailID"]);
+            respone.Gather(new Gather(action: "/Review/ConfirmDelete", numDigits: 1)
+                .Say("You chose to delete " + od.Product.Description + " ,size " + od.Size.Size1 + " , from your order. to confirm press 1. to cancel "
+                + "press2", voice: "alice", language: "en-US"));
+            respone.Redirect("/Review/ChooseDelete");
+            return TwiML(respone);
+        }
+
+        public TwiMLResult ConfirmDelete(string digits)
+        {
+            var response = new VoiceResponse();
+            if (digits == "1")
+            {
+                ReviewRepository repo = new ReviewRepository();
+                repo.DeleteOrderDetail((int)Session["OrderDetailID"]);
+                response.Say("Item successfully Deleted.", voice: "alice", language: "en-US");
+                response.Redirect("/Review/ReviewEntireOrder");
+            }
+            else if (digits == "2")
+            {
+                response.Say("Delete canceled.", voice: "alice", language: "en-US");
+                _index++;
+                response.Redirect("/Review/ReviewEntireOrder");
+            }
+            else
+            {
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
+                response.Redirect("/Review/ChooseDelete");
+            }
+            return TwiML(response);
+        }
+
         [HttpPost]
         public TwiMLResult EnterDetail()
         {
@@ -305,11 +362,17 @@ namespace BirovAm2015.Controllers
             {
                 response.Gather(new Gather(action: "/Review/FindBySize?productCode=" + int.Parse(digits), numDigits: 3)
                     .Say("we found multiple of that item in your order. to narrow it down please enter the size code of the item you want to edit", voice: "alice", language: "en-US"));
+                response.Redirect("/Review/FindDetail?digits=" + details[0].Product.ProductCode);
             }
             else
             {
                 Session["OrderDetailID"] = details[0].OrderDetailID;
-                response.Redirect("/Review/ReviewDetail");
+                response.Gather(new Gather(action: "/Review/ChooseEdit1", numDigits: 1)
+                .Say("you chose, " + details[0].Quantity + " ," + details[0].Product.Description + " ,size " + details[0].Size.Size1
+                    + ". to change the quantity press 1, to change the size press 2, to delete this item from your cart "
+                    + "press 3, to return to the previous menu press 4, to return to "
+                    + "the main menu press 5.", voice: "alice", language: "en-US"));
+                response.Redirect("/Review/FindDetail?digits=" + details[0].Product.ProductCode);
             }
             return TwiML(response);
         }
@@ -352,8 +415,7 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "3")
             {
-                ReviewRepository repo = new ReviewRepository();
-                repo.DeleteOrderDetail((int)Session["OrderDetailID"]);
+                response.Redirect("/review/ChooseDelete1");
             }
             else if (digits == "4")
             {
@@ -384,10 +446,19 @@ namespace BirovAm2015.Controllers
         public TwiMLResult ReviewQuantity1(string digits)
         {
             var response = new VoiceResponse();
-            response.Gather(new Gather(action: "/Review/ConfirmQuantity1?qty=" + int.Parse(digits), numDigits: 1)
-                .Say("you have chosen to update the quantity to, " + digits + " . to enter the quantity again, press 1. to confirm and not make any more changes to this item "
-                + "press 2. to confirm and change the size of your item press 3.", voice: "alice", language: "en-US"));
-            response.Redirect("/Review/ReviewQuantity1?digits=" + digits);
+            var repo = new ReviewRepository();
+            if (repo.OutOfStock((int)Session["OrderDetailID"], int.Parse(digits), 0))
+            {
+                response.Say("I'm sorry, but there is not enough stock for the quantity you chose, please choose a different amount", voice: "alice", language: "en-US");
+                response.Redirect("/Review/EditQuantity1");
+            }
+            else
+            {
+                response.Gather(new Gather(action: "/Review/ConfirmQuantity1?qty=" + int.Parse(digits), numDigits: 1)
+                    .Say("you have chosen to update the quantity to, " + digits + " . to enter the quantity again, press 1. to confirm and not make any more changes to this item "
+                    + "press 2. to confirm and change the size of your item press 3.", voice: "alice", language: "en-US"));
+                response.Redirect("/Review/ReviewQuantity1?digits=" + digits);
+            }
             return TwiML(response);
         }
 
@@ -433,23 +504,34 @@ namespace BirovAm2015.Controllers
         public TwiMLResult ReviewSize1(string digits)
         {
             var response = new VoiceResponse();
-            SalesRepository repo = new SalesRepository();
+            ReviewRepository repo = new ReviewRepository();
             Size size = repo.FindSizeBySizeCodeForProduct(digits, (int)Session["OrderDetailID"]);
-            if (!repo.DoesSizeExist(digits))
+            if (!repo.DoesSizeExist(digits)) 
             {
                 response.Say("invalid size code, please try again", voice: "alice", language: "en-GB");
-                response.Redirect("/Review/EditSize");
+                response.Redirect("/Review/EditSize1");
             }
             else if (size == null)
             {
                 response.Say("Product not available in this size, please try again", voice: "alice", language: "en-GB");
-                response.Redirect("/Review/EditSize");
+                response.Redirect("/Review/EditSize1");
+            }
+            else if (repo.DoesItemExistInOrder(digits, (int)Session["OrderDetailID"]))
+            {
+                response.Say("you already have this item in size " + size.Size1 + " in your order, to make changes to that item find it from the review menu "
+                    + " and edit it.");
+                response.Redirect("/Review/ReviewOptions");
+            }
+            else if (repo.OutOfStock((int)Session["OrderDetailID"], 0, size.SizeID))
+            {
+                response.Say("I'm sorry but you can't change the size of this item, since there is no enough stock in the size you chose", voice: "alice", language: "en-GB");
+                response.Redirect("/Review/ReviewOptions");
             }
             else
             {
-                response.Gather(new Gather(action: "/Review/ConfirmSize?sizeId=" + size.SizeID + "&sizeCode=" + size.SizeCode, numDigits: 1)
+                response.Gather(new Gather(action: "/Review/ConfirmSize1?sizeId=" + size.SizeID + "&sizeCode=" + size.SizeCode, numDigits: 1)
                     .Say("you have chosen to update the size to, " + size.Size1 + " , to enter the size again, press 1. to confirm press 2.", voice: "alice", language: "en-US"));
-                response.Redirect("/Review/ReviewSize?digits=" + digits);
+                response.Redirect("/Review/ReviewSize1?digits=" + digits);
             }
             return TwiML(response);
         }
@@ -472,6 +554,41 @@ namespace BirovAm2015.Controllers
             {
                 response.Say("Invalid choice");
                 response.Redirect("/Review/ReviewSize1?digits=" + sizeCode.ToString());
+            }
+            return TwiML(response);
+        }
+
+        public TwiMLResult ChooseDelete1()
+        {
+            var respone = new VoiceResponse();
+            var repo = new ReviewRepository();
+            OrderDetail od = repo.GetOrderDetailByOrderDetailId((int)Session["OrderDetailID"]);
+            respone.Gather(new Gather(action: "/Review/ConfirmDelete1", numDigits: 1)
+                .Say("You chose to delete " + od.Product.Description + " ,size " + od.Size.Size1 + " , from your order. to confirm press 1. to cancel "
+                + "press2", voice: "alice", language: "en-US"));
+            respone.Redirect("/Review/ChooseDelete1");
+            return TwiML(respone);
+        }
+
+        public TwiMLResult ConfirmDelete1(string digits)
+        {
+            var response = new VoiceResponse();
+            if(digits == "1")
+            {
+                ReviewRepository repo = new ReviewRepository();
+                repo.DeleteOrderDetail((int)Session["OrderDetailID"]);
+                response.Say("Item successfully Deleted.", voice: "alice", language: "en-US");
+                response.Redirect("/Review/ReviewOptions");
+            }
+            else if(digits == "2")
+            {
+                response.Say("Delete canceled.", voice: "alice", language: "en-US");
+                response.Redirect("/Review/ReviewOptions");
+            }
+            else
+            {
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
+                response.Redirect("/Review/ChooseDelete1");
             }
             return TwiML(response);
         }

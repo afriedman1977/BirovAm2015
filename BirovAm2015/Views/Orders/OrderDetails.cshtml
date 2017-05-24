@@ -1,0 +1,36 @@
+﻿@using BirovAm.data;
+@model Order
+<h2>OrderDetails for Order Number - @Model.OrderID</h2>
+<br />
+
+<h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
+<h4>Address - @Model.Customer.Address</h4>
+<h4>Phone Number - @Model.Customer.PhoneNumber</h4>
+<br />
+
+<table class="table">
+    <tr>
+        <th>Item</th>
+        <th>Description</th>
+        <th>Size</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+    </tr>
+    @foreach (OrderDetail od in Model.OrderDetails)
+    {
+        <tr>
+            <td>@od.Product.ProductCode</td>
+            <td>@od.Product.Description</td>
+            <td>@od.Size.Size1</td>
+            <td>@od.Price</td>
+            <td>@od.Quantity</td>
+            <td>@od.Price</td>
+        </tr>
+    }
+</table>
+
+<h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
+<h4 style="text-align:right">Total Cost = @Model.TotalCost</h4>
+
+

@@ -58,6 +58,7 @@
     <Compile Include="BirovAmContext.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="OrderDetail.cs" />
+    <Compile Include="OrdersRepository.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductsRepository.cs" />
     <Compile Include="ProductsSize.cs" />
