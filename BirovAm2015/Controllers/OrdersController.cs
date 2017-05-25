@@ -24,9 +24,15 @@ namespace BirovAm2015.Controllers
             return View(repo.GetOrderWithDetailsByOrderId(orderId));
         }
 
+        public ActionResult OrderDetailsForPrint(int orderId)
+        {
+            OrdersRepository repo = new OrdersRepository();
+            return View(repo.GetOrderWithDetailsByOrderId(orderId));
+        }
+
         public ActionResult PrintInvoice(int orderId)
         {
-            return new ActionAsPdf("OrderDetails", new { orderId = orderId });
+            return new ActionAsPdf("OrderDetailsForPrint", new { orderId = orderId });
         }
     }
 }

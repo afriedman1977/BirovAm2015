@@ -25,14 +25,14 @@ namespace BirovAm2015.Controllers
             var response = new VoiceResponse();
             if (product == null)
             {
-                response.Say("invalid item code please try again", voice: "alice", language: "en-GB");
+                response.Say("invalid item code please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Welcome/ChooseItem");
             }
             else
             {
                 response.Gather(new Gather(action: "/Sales/ConfirmItem?pID=" + product.ProductID + "&price=" + product.Price + "&itemCode=" + digits, numDigits: 1)
-                    .Say("You have chosen, " + product.Description + " , to confirm choice, press 1 ."
-                   + " to cancel press 2.", voice: "alice", language: "en-GB"));
+                    .Say("You have chosen, " + product.Description + " . to confirm choice, press 1 ."
+                   + " to cancel press 2.", voice: "alice", language: "en-US"));
                 response.Redirect("/Sales/Choose?digits=" + digits);
             }
             return TwiML(response);
@@ -49,11 +49,11 @@ namespace BirovAm2015.Controllers
                 {
                     OrderID = (int)Session["orderId"],
                     ProductID = pID,
-                    SizeID = 100000,
+                    SizeID = 32,
                     Quantity = 1,
                     Price = price
                 };
-                repo.CreateOrderDetail(od);
+                repo.CreateOrderDetail(od, (int)Session["orderId"]);
                 Session["orderDetailId"] = od.OrderDetailID;
                 response.Redirect("/Sales/ChooseSize?pID=" + pID);
             }
@@ -63,7 +63,7 @@ namespace BirovAm2015.Controllers
             }
             else
             {
-                response.Say("Invalid choice", voice: "alice", language: "en-GB");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Sales/Choose?digits=" + pID);
             }
             return TwiML(response);
@@ -74,7 +74,7 @@ namespace BirovAm2015.Controllers
         {
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Sales/VerifySize?pID=" + pID, numDigits: 3)
-                    .Say("Please enter a size code", voice: "alice", language: "en-GB"));
+                    .Say("Please enter a size code", voice: "alice", language: "en-US"));
             response.Redirect("/Sales/ChooseSize?pID=" + pID);
             return TwiML(response);
         }
@@ -87,30 +87,30 @@ namespace BirovAm2015.Controllers
             Size size = repo.FindSizeBySizeCodeForProduct(digits, pID);
             if (!repo.DoesSizeExist(digits))
             {
-                response.Say("invalid size code, please try again", voice: "alice", language: "en-GB");
+                response.Say("invalid size code, please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Sales/ChooseSize?pID=" + pID);
             }
             else if (size == null)
             {
-                response.Say("Product not available in this size, please try again", voice: "alice", language: "en-GB");
+                response.Say("Product not available in this size, please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Sales/ChooseSize?pID=" + pID);
             }
             else if (repo.OutOfStock(pID, size.SizeID, 1))
             {
                 response.Gather(new Gather(action: "/Sales/Duplicate?pId=" + pID + "&digi=" + digits, numDigits: 1)
-                    .Say("This item is out of stock in size " + size.Size1 + " to choose a different size press 1, to delete this item press 2.", voice: "alice", language: "en-GB"));
+                    .Say("This item is out of stock in size " + size.Size1 + ". to choose a different size press 1, to delete this item press 2.", voice: "alice", language: "en-US"));
                 response.Redirect("/Sales/VerifySize?pID=" + pID + "&digits=" + digits);
             }
             else if (repo.DoesItemExistInOrder((int)Session["orderId"], pID, size.SizeID))
             {
                 response.Gather(new Gather(action: "/Sales/Duplicate?pId=" + pID + "&digi=" + digits, numDigits: 1)
-                    .Say("You already have this item in your order. to choose a different size press 1, to delete this item press 2.", voice: "alice", language: "en-GB"));
+                    .Say("You already have this item in your order. to choose a different size press 1, to delete this item press 2.", voice: "alice", language: "en-US"));
                 response.Redirect("/Sales/VerifySize?pID=" + pID + "&digits=" + digits);
             }
             else
             {
                 response.Gather(new Gather(action: "/Sales/ConfirmSize?pID=" + pID + "&sId=" + size.SizeID, numDigits: 1)
-                    .Say("You have chosen size," + size.Size1 + ", to confirm press 1, to try again press 2.", voice: "alice", language: "en-GB"));
+                    .Say("You have chosen size," + size.Size1 + ". to confirm press 1, to try again press 2.", voice: "alice", language: "en-US"));
                 response.Redirect("/Sales/VerifySize?pID=" + pID + "&digits=" + digits);
             }
             return TwiML(response);
@@ -127,13 +127,13 @@ namespace BirovAm2015.Controllers
             else if(digits == "2")
             {
                 SalesRepository repo = new SalesRepository();
-                repo.DeleteOrderDetail((int)Session["orderDetailId"]);
-                response.Say("Item successfully deleted", voice: "alice", language: "en-GB");
-                response.Redirect("Sales/ConfirmOrderDetail?digits=" + 3);
+                repo.DeleteOrderDetail((int)Session["orderDetailId"], (int)Session["orderId"]);
+                response.Say("Item successfully deleted", voice: "alice", language: "en-US");
+                response.Redirect("/Sales/ConfirmOrderDetail?digits=" + 99);
             }
             else
             {
-                response.Say("Invalid choice", voice: "alice", language: "en-GB");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Sales/VerifySize?pID=" + pId + "&digits=" + digi);
             }
             return TwiML(response);
@@ -155,7 +155,7 @@ namespace BirovAm2015.Controllers
             }
             else
             {
-                response.Say("Invalid choice", voice: "alice", language: "en-GB");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Sales/VerifySize?pID=" + pID + "&digits=" + sId);
             }
             return TwiML(response);
@@ -181,7 +181,7 @@ namespace BirovAm2015.Controllers
             {
                 response.Gather(new Gather(action: "/Sales/NotEnoughStock?digi=" + digits, numDigits: 1)
                     .Say("There is not enough stock left in size " + detail.Size.Size1 + " for the quantity you chose, to choose a different Quantity press 1,"
-                    + " to delete this item press 2.", voice: "alice", language: "en-GB"));
+                    + " to delete this item press 2.", voice: "alice", language: "en-US"));
                 response.Redirect("/Sales/VerifyQuantity?digits=" + digits);
             }
             else
@@ -203,13 +203,13 @@ namespace BirovAm2015.Controllers
             }
             else if(digits == "2")
             {
-                repo.DeleteOrderDetail((int)Session["orderDetailId"]);
-                response.Say("Item successfully deleted", voice: "alice", language: "en-GB");
-                response.Redirect("Sales/ConfirmOrderDetail?digits=" + 3);
+                repo.DeleteOrderDetail((int)Session["orderDetailId"], (int)Session["orderId"]);
+                response.Say("Item successfully deleted", voice: "alice", language: "en-US");
+                response.Redirect("/Sales/ConfirmOrderDetail?digits=" + 99);
             }
             else
             {
-                response.Say("Invalid choice", voice: "alice", language: "en-GB");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Sales/VerifyQuantity?digits=" + digi);
             }
             return TwiML(response);
@@ -232,9 +232,9 @@ namespace BirovAm2015.Controllers
             {
                 SalesRepository repo = new SalesRepository();
                 repo.AddQuantityToOrderDetail(int.Parse(qty), (int)Session["orderDetailId"], (int)Session["orderId"]);
-                response.Gather(new Gather(action: "/Sales/ConfirmOrderDetail", numDigits: 1, timeout: 25)
+                response.Gather(new Gather(action: "/Sales/ConfirmOrderDetail", numDigits: 1)
                     .Say("To add another item press 1, to checkout press 2, to review and edit your order press 3", voice: "alice", language: "en-US"));
-                response.Redirect("Sales/ConfirmOrderDetail?digits=" + 3);
+                response.Redirect("/Sales/ConfirmOrderDetail?digits=" + 99);
             }
             return TwiML(response);
         }
@@ -243,11 +243,11 @@ namespace BirovAm2015.Controllers
         public TwiMLResult ConfirmOrderDetail(string digits)
         {
             var response = new VoiceResponse();
-            if (digits != "1" && digits != "2")
+            if (digits != "1" && digits != "2" && digits != "3")
             {
                 response.Gather(new Gather(action: "/Sales/ConfirmOrderDetail", numDigits: 1)
-                   .Say("To add another item press 1, to checkout press 2", voice: "alice", language: "en-US"));
-                response.Redirect("Sales/ConfirmOrderDetail?digits=" + 3);
+                   .Say("To add another item press 1, to checkout press 2, to review and edit your order press 3", voice: "alice", language: "en-US"));
+                response.Redirect("/Sales/ConfirmOrderDetail?digits=" + 99);
             }
             else if (digits == "1")
             {

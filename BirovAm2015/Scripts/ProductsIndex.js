@@ -15,8 +15,8 @@
     });
 
     $("#add-size").click(function () {
-        $("#submit-add-category").show();
-        $("#submit-edit-category").hide();
+        $("#submit-add-size").show();
+        $("#submit-edit-size").hide();
         $(".modal-title-category").text("Add Category");
         $("#add-size-modal").modal();
     });
@@ -65,6 +65,27 @@
             $(".modal-title-category").text("Edit Category");
             $("#add-category-modal").modal();
         });
+    });
+
+    $(".delete-product").click(function () {
+        var product = $(this).closest('tr').find('td:eq(1)').text();
+        if (!confirm("Do you want to delete " + product)) {
+            return false;
+        }
+    });
+
+    $(".delete-size").click(function () {
+        var product = $(this).closest('tr').find('td:eq(1)').text();
+        if (!confirm("Do you want to delete size - " + product)) {
+            return false;
+        }
+    });
+
+    $(".delete-category").click(function () {
+        var product = $(this).closest('tr').find('td:eq(0)').text();
+        if (!confirm("Do you want to delete category - " + product)) {
+            return false;
+        }
     });
 
     function populate(cats) {

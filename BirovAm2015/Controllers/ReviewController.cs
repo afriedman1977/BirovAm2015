@@ -103,7 +103,7 @@ namespace BirovAm2015.Controllers
             }
             else
             {
-                response.Say("invalid choice");
+                response.Say("invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             return TwiML(response);
@@ -116,12 +116,12 @@ namespace BirovAm2015.Controllers
             List<OrderDetail> orderDetails = repo.GetOrderDetailsByOrderId((int)Session["orderId"]);
             if (orderDetails.Count == 0)
             {
-                response.Say("We could not find any items in this order");
+                response.Say("We could not find any items in this order", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else if (_index == orderDetails.Count)
             {
-                response.Say("there are no more items to review");
+                response.Say("there are no more items to review", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else
@@ -168,7 +168,7 @@ namespace BirovAm2015.Controllers
             }
             else
             {
-                response.Say("Invalid choice");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             return TwiML(response);
@@ -213,7 +213,7 @@ namespace BirovAm2015.Controllers
             {
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateQuantity(qty, (int)Session["OrderDetailID"]);
-                response.Say("Quantity successfully updated.");
+                response.Say("Quantity successfully updated.", voice: "alice", language: "en-US");
                 _index++;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
@@ -221,12 +221,12 @@ namespace BirovAm2015.Controllers
             {
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateQuantity(qty, (int)Session["OrderDetailID"]);
-                response.Say("Quantity successfully updated.");
+                response.Say("Quantity successfully updated.", voice: "alice", language: "en-US");
                 response.Redirect("/Review/EditSize");
             }
             else
             {
-                response.Say("Invalid choice");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewQuantity?digits=" + qty.ToString());
             }
             return TwiML(response);
@@ -248,24 +248,24 @@ namespace BirovAm2015.Controllers
             Size size = repo.FindSizeBySizeCodeForProduct(digits, (int)Session["OrderDetailID"]);
             if (!repo.DoesSizeExist(digits)) 
             {
-                response.Say("invalid size code, please try again", voice: "alice", language: "en-GB");
+                response.Say("invalid size code, please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Review/EditSize");
             }
             else if (size == null)
             {
-                response.Say("Product not available in this size, please try again", voice: "alice", language: "en-GB");
+                response.Say("Product not available in this size, please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Review/EditSize");
             }
             else if(repo.DoesItemExistInOrder(digits, (int)Session["OrderDetailID"]))
             {
                 response.Say("you already have this item in size " + size.Size1 + " in your order, to make changes to that item find it from the review menu "
-                    + " and edit it.");
+                    + " and edit it.", voice: "alice", language: "en-US");
                 _index++;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else if(repo.OutOfStock((int)Session["OrderDetailID"], 0, size.SizeID))
             {
-                response.Say("I'm sorry but you can't change the size of this item, since there is no enough stock in the size you chose", voice: "alice", language: "en-GB");
+                response.Say("I'm sorry but you can't change the size of this item, since there is not enough stock in the size you chose", voice: "alice", language: "en-US");
                 _index++;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
@@ -295,7 +295,7 @@ namespace BirovAm2015.Controllers
             }
             else
             {
-                response.Say("Invalid choice");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewSize?digits=" + sizeCode.ToString());
             }
             return TwiML(response);
@@ -427,7 +427,7 @@ namespace BirovAm2015.Controllers
             }
             else
             {
-                response.Say("Invalid choice");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewDetail");
             }
             return TwiML(response);
@@ -473,19 +473,19 @@ namespace BirovAm2015.Controllers
             {
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateQuantity(qty, (int)Session["OrderDetailID"]);
-                response.Say("Quantity successfully updated.");
+                response.Say("Quantity successfully updated.", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else if (digits == "3")
             {
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateQuantity(qty, (int)Session["OrderDetailID"]);
-                response.Say("Quantity successfully updated.");
+                response.Say("Quantity successfully updated.", voice: "alice", language: "en-US");
                 response.Redirect("/Review/EditSize1");
             }
             else
             {
-                response.Say("Invalid choice");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewQuantity1?digits=" + qty.ToString());
             }
             return TwiML(response);
@@ -508,23 +508,23 @@ namespace BirovAm2015.Controllers
             Size size = repo.FindSizeBySizeCodeForProduct(digits, (int)Session["OrderDetailID"]);
             if (!repo.DoesSizeExist(digits)) 
             {
-                response.Say("invalid size code, please try again", voice: "alice", language: "en-GB");
+                response.Say("invalid size code, please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Review/EditSize1");
             }
             else if (size == null)
             {
-                response.Say("Product not available in this size, please try again", voice: "alice", language: "en-GB");
+                response.Say("Product not available in this size, please try again", voice: "alice", language: "en-US");
                 response.Redirect("/Review/EditSize1");
             }
             else if (repo.DoesItemExistInOrder(digits, (int)Session["OrderDetailID"]))
             {
                 response.Say("you already have this item in size " + size.Size1 + " in your order, to make changes to that item find it from the review menu "
-                    + " and edit it.");
+                    + " and edit it.", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else if (repo.OutOfStock((int)Session["OrderDetailID"], 0, size.SizeID))
             {
-                response.Say("I'm sorry but you can't change the size of this item, since there is no enough stock in the size you chose", voice: "alice", language: "en-GB");
+                response.Say("I'm sorry but you can't change the size of this item, since there is not enough stock in the size you chose", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else
@@ -547,12 +547,12 @@ namespace BirovAm2015.Controllers
             {
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateSize(sizeCode, (int)Session["OrderDetailID"]);
-                response.Say("Size successfully updated.");
+                response.Say("Size successfully updated.", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else
             {
-                response.Say("Invalid choice");
+                response.Say("Invalid choice", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewSize1?digits=" + sizeCode.ToString());
             }
             return TwiML(response);

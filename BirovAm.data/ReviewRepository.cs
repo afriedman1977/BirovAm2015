@@ -37,10 +37,13 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                OrderDetail od = ctx.OrderDetails.Where(d => d.OrderDetailID == odId).FirstOrDefault();
+                OrderDetail od = ctx.OrderDetails.Include(d => d.Order).Where(d => d.OrderDetailID == odId).FirstOrDefault();
                 od.DeleteFlag = true;
                 ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
                 ps.Stock += od.Quantity.Value;
+                ctx.SaveChanges();
+                od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID && x.DeleteFlag != true).Sum(x => x.Price);
+                od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID && x.DeleteFlag != true).Sum(x => x.Quantity);
                 ctx.SaveChanges();
             }
         }
@@ -50,13 +53,14 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 OrderDetail od = ctx.OrderDetails.Include(d => d.Order).Include(d => d.Product).Where(d => d.OrderDetailID == odId).FirstOrDefault();
+                var origQty = od.Quantity.Value;
                 od.Quantity = qty;
                 od.Price = od.Product.Price * od.Quantity;
                 ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
-                ps.Stock += (od.Quantity.Value - qty);
+                ps.Stock += (origQty - qty);
                 ctx.SaveChanges();
-                od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Price);
-                od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Quantity);
+                od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID && x.DeleteFlag != true).Sum(x => x.Price);
+                od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID && x.DeleteFlag != true).Sum(x => x.Quantity);
                 ctx.SaveChanges();
             }
         }
@@ -67,7 +71,7 @@ namespace BirovAm.data
             {
                 OrderDetail od = ctx.OrderDetails.Include(d => d.Order).Include(d => d.Product).Where(d => d.OrderDetailID == odId).FirstOrDefault();
                 ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && (sId == 0 ? p.SizeID == od.SizeID : p.SizeID == sId)).FirstOrDefault();
-                return qty > 0 ? (ps.Stock + (od.Quantity.Value - qty)) > 5 : (ps.Stock - od.Quantity.Value) > 5;
+                return qty > 0 ? (ps.Stock + (od.Quantity.Value - qty)) <= 5 : (ps.Stock - od.Quantity.Value) <= 5;
             }
         }
 
@@ -99,7 +103,7 @@ namespace BirovAm.data
             {
                 Size s = ctx.Sizes.Where(x => x.SizeCode == sizeCode).FirstOrDefault();
                 OrderDetail od = ctx.OrderDetails.Include(d => d.Product).Where(d => d.OrderDetailID == odId).FirstOrDefault();
-                return ctx.OrderDetails.Include(d => d.Order).Any(d => d.Order.OrderID == od.OrderID && d.ProductID == od.Product.ProductID && d.SizeID == s.SizeID);
+                return ctx.OrderDetails.Include(d => d.Order).Any(d => d.Order.OrderID == od.OrderID && d.ProductID == od.Product.ProductID && d.SizeID == s.SizeID && d.DeleteFlag != true);
             }
         }
 
@@ -108,7 +112,12 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 OrderDetail od = ctx.OrderDetails.Where(d => d.OrderDetailID == odId).FirstOrDefault();
+                var origSid = od.SizeID;
                 od.SizeID = sId;
+                ProductsSize ps1 = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == origSid).FirstOrDefault();
+                ProductsSize ps2 = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
+                ps1.Stock += od.Quantity.Value;
+                ps2.Stock -= od.Quantity.Value;
                 ctx.SaveChanges();
             }
         }

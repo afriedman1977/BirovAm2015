@@ -25,9 +25,12 @@
             <td>@o.OrderID</td>
             <td>@o.Customer.FirstName</td>
             <td>@o.Customer.LastName</td>
-            <td>@o.Customer.PhoneNumber</td>
-            <td>@o.OrderDate</td>
-            <td>@o.TotalCost</td>
+            <td>@string.Format("{0}-{1}-{2}",
+                  o.Customer.PhoneNumber.Substring(0, 3),
+                  o.Customer.PhoneNumber.Substring(3, 3),
+                  o.Customer.PhoneNumber.Substring(6, 4))</td>
+            <td>@o.OrderDate.ToShortDateString()</td>
+            <td>@string.Format("{0:C}", o.TotalCost)</td>
             <td>
                 <a href="/Orders/OrderDetails?orderId=@o.OrderID" class="btn btn-primary">Order Details</a>
                 <a href="/Orders/PrintInvoice?orderId=@o.OrderID" class="btn btn-success">Print</a>

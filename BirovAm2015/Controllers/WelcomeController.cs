@@ -26,7 +26,7 @@ namespace BirovAm2015.Controllers
                 // .Play("/Sound_Files/PracticeTwilio2.wav")
                 .Say("Welcome To the Berov am clothing Hotline. press 1 to start shopping, "
                 + "press 2 to review a previous order, press 3 to hear deadline and pickup location, "
-                + "press 4 to leave a message.", voice: "alice", language: "en-GB"));
+                + "press 4 to leave a message.", voice: "alice", language: "en-US"));
             response.Redirect("/Welcome/Welcome", method: "GET");
             return TwiML(response);
         }
@@ -96,7 +96,7 @@ namespace BirovAm2015.Controllers
             else
             {
                 response.Gather(new Gather(action: "/Welcome/VerifyNumber", numDigits: 10)
-                    .Say("Please enter your 10 digit Phone Number", voice: "alice", language: "en-GB"));
+                    .Say("Please enter your 10 digit Phone Number", voice: "alice", language: "en-US"));
                 response.Redirect("/Welcome/GetCustomer");
                 return TwiML(response);
             }
@@ -159,7 +159,7 @@ namespace BirovAm2015.Controllers
                 }
                 else
                 {
-                    response.Say("Please record your name and address after the beep. press the pound key when you are done", voice: "alice", language: "en-GB");
+                    response.Say("Please record your name and address after the beep. press the pound key when you are done", voice: "alice", language: "en-US");
                     response.Record(action: "/Welcome/CaptureRecording?phoneNumber=" + phoneNumber, finishOnKey: "#");
                     return TwiML(response);
                 }
@@ -201,7 +201,7 @@ namespace BirovAm2015.Controllers
         {
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Sales/ChooseItem", numDigits: 3)
-                .Say("Please enter an item code.", voice: "alice", language: "en-GB"));
+                .Say("Please enter an item code.", voice: "alice", language: "en-US"));
             response.Redirect("/Welcome/ChooseItem");
             return TwiML(response);
         }
@@ -210,7 +210,7 @@ namespace BirovAm2015.Controllers
         public TwiMLResult HearInfo()
         {
             var response = new VoiceResponse();
-            response.Say("Schedule", voice: "alice", language: "en-GB");
+            response.Say("Schedule", voice: "alice", language: "en-US");
             response.Redirect("/Welcome/Welcome");
             return TwiML(response);
         }
@@ -219,7 +219,7 @@ namespace BirovAm2015.Controllers
         public TwiMLResult RecordMessage()
         {
             var response = new VoiceResponse();
-            response.Say("Please record your message after the beep. press the pound key when you are done", voice: "alice", language: "en-GB");
+            response.Say("Please record your message after the beep. press the pound key when you are done", voice: "alice", language: "en-US");
             response.Record(action: "/Welcome/SaveMessage", finishOnKey: "#", timeout: 10);
             return TwiML(response);
         }

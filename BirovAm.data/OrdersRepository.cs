@@ -21,7 +21,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Orders.Include(o => o.Customer).Include(o => o.OrderDetails.Where(d => d.DeleteFlag != true).Select(d => d.Product)).Include(o => o.OrderDetails.Where(d => d.DeleteFlag != true).Select(d => d.Size)).Where(o => o.OrderID == oId).FirstOrDefault();
+                return ctx.Orders.Include(o => o.Customer).Include(o => o.OrderDetails.Select(d => d.Product)).Include(o => o.OrderDetails.Select(d => d.Size)).Where(o => o.OrderID == oId).FirstOrDefault();
             }
         }
     }

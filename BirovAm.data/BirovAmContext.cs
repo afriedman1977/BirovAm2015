@@ -92,10 +92,6 @@ namespace BirovAm.data
                 .HasPrecision(19, 4);
 
             modelBuilder.Entity<Order>()
-                .Property(e => e.TotalQuantity)
-                .HasPrecision(19, 4);
-
-            modelBuilder.Entity<Order>()
                 .HasMany(e => e.OrderDetails)
                 .WithRequired(e => e.Order)
                 .WillCascadeOnDelete(false);

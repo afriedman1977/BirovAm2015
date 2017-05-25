@@ -26,8 +26,7 @@ namespace BirovAm.data
         [Column(TypeName = "money")]
         public decimal? TotalAmountPaid { get; set; }
 
-        [Column(TypeName = "money")]
-        public decimal? TotalQuantity { get; set; }
+        public int? TotalQuantity { get; set; }
 
         public virtual Customer Customer { get; set; }
 

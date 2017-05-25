@@ -1,14 +1,30 @@
-﻿@using BirovAm.data;
+﻿
+@{
+    Layout = null;
+}
+
+@using BirovAm.data;
 @model Order
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <title>OrderDetailsForPrint</title>
+</head>
+<body>
+ 
 <h2>OrderDetails for Order Number - @Model.OrderID</h2>
 <br />
 
 <h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
 <h4>Address - @Model.Customer.Address</h4>
-<h4>Phone Number - @string.Format("({0}) {1}-{2}",
-                  Model.Customer.PhoneNumber.Substring(0, 3),
-                  Model.Customer.PhoneNumber.Substring(3, 3),
-                  Model.Customer.PhoneNumber.Substring(6, 4))</h4>
+<h4>Phone Number - @string.Format("({0}) {1}-{2}", 
+                  Model.Customer.PhoneNumber.Substring(0,3), 
+                  Model.Customer.PhoneNumber.Substring(3, 3), 
+                  Model.Customer.PhoneNumber.Substring(6,4))</h4>
 <br />
 
 <table class="table">
@@ -28,12 +44,14 @@
             <td>@od.Size.Size1</td>
             <td>@string.Format("{0:C}", od.Product.Price)</td>
             <td>@od.Quantity</td>
-            <td>@string.Format("{0:C}", od.Price) </td>
+            <td>@string.Format("{0:C}", od.Price)</td>
         </tr>
     }
 </table>
 
 <h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
-<h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.TotalCost)</h4>
+<h4 style="text-align:right">Total Cost = @Model.TotalCost</h4>
 
 
+</body>
+</html>

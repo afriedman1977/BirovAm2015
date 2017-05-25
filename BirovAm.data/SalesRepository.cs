@@ -51,11 +51,15 @@ namespace BirovAm.data
             }
         }
 
-        public void CreateOrderDetail(OrderDetail od)
+        public void CreateOrderDetail(OrderDetail od, int oId)
         {
             using (var ctx = new BirovAmContext())
             {
                 ctx.OrderDetails.Add(od);
+                ctx.SaveChanges();
+                Order order = ctx.Orders.Where(o => o.OrderID == oId).FirstOrDefault();
+                order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == oId && x.DeleteFlag != true).Sum(x => x.Price);
+                order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == oId && x.DeleteFlag != true).Sum(x => x.Quantity);
                 ctx.SaveChanges();
             }
         }
@@ -93,7 +97,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.OrderDetails.Include(d => d.Order).Any(d => d.Order.OrderID == orderId && d.ProductID == pId && d.SizeID == sId);
+                return ctx.OrderDetails.Include(d => d.Order).Any(d => d.Order.OrderID == orderId && d.ProductID == pId && d.SizeID == sId && d.DeleteFlag != true);
             }
         }
 
@@ -128,8 +132,8 @@ namespace BirovAm.data
                 ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
                 ps.Stock -= (quantity - 1);
                 ctx.SaveChanges();
-                od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Price);
-                od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID).Sum(x => x.Quantity);
+                od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == orderId && x.DeleteFlag != true).Sum(x => x.Price);
+                od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == orderId && x.DeleteFlag != true).Sum(x => x.Quantity);
                 ctx.SaveChanges();
             }
         }
@@ -143,14 +147,21 @@ namespace BirovAm.data
             }
         }
 
-        public void DeleteOrderDetail(int odId)
+        public void DeleteOrderDetail(int odId, int oId)
         {
             using (var ctx = new BirovAmContext())
             {
                 OrderDetail od = ctx.OrderDetails.Where(d => d.OrderDetailID == odId).FirstOrDefault();
                 ProductsSize ps = ctx.ProductsSizes.Where(p => p.ProductID == od.ProductID && p.SizeID == od.SizeID).FirstOrDefault();
-                ps.Stock += od.Quantity.Value;
+                if (ps != null)
+                {
+                    ps.Stock += od.Quantity.Value;
+                }
                 ctx.Entry(od).State = EntityState.Deleted;
+                ctx.SaveChanges();
+                Order order = ctx.Orders.Where(o => o.OrderID == oId).FirstOrDefault();
+                order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == oId && x.DeleteFlag != true).Sum(x => x.Price);
+                order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == oId && x.DeleteFlag != true).Sum(x => x.Quantity);
                 ctx.SaveChanges();
             }
         }
