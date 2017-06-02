@@ -57,7 +57,7 @@ namespace BirovAm2015.Controllers
         public TwiMLResult GetCustomer(string From)
         {
             var response = new VoiceResponse();
-            if (From != null)
+            if(From != null && From.Substring(2).Length == 10)
             {
                 SalesRepository repo = new SalesRepository();
                 Customer customer = repo.FindCustomerByPhoneNumber(From.Substring(2));
@@ -66,7 +66,7 @@ namespace BirovAm2015.Controllers
                     Order order = repo.GetOrderByCustomerId(customer.CustomerID);
                     if (order != null)
                     {
-                        response.Say("we found an order associated with this phone number, you will now be redirected to the review option");
+                        response.Say("we found an order associated with this phone number, you will now be redirected to the review option", voice: "alice", language: "en-US");
                         Session["customerId"] = customer.CustomerID;
                         Session["orderId"] = order.OrderID;
                         response.Redirect("/Review/ReviewOptions");
@@ -97,7 +97,7 @@ namespace BirovAm2015.Controllers
             {
                 response.Gather(new Gather(action: "/Welcome/VerifyNumber", numDigits: 10)
                     .Say("Please enter your 10 digit Phone Number", voice: "alice", language: "en-US"));
-                response.Redirect("/Welcome/GetCustomer");
+                response.Redirect("/Welcome/GetCustomer", method: "GET");
                 return TwiML(response);
             }
         }
@@ -109,7 +109,7 @@ namespace BirovAm2015.Controllers
             if (digits.Length != 10)
             {
                 response.Say("invalid phone number");
-                response.Redirect("/Welcome/GetCustomer");
+                response.Redirect("/Welcome/GetCustomer", method: "GET");
                 return TwiML(response);
             }
             response.Gather(new Gather(action: "/Welcome/VerifyCustomer?phoneNumber=" + digits, numDigits: 1)
@@ -124,7 +124,7 @@ namespace BirovAm2015.Controllers
             var response = new VoiceResponse();
             if (digits == "2")
             {
-                return TwiML(response.Redirect("/Welcome/GetCustomer"));
+                return TwiML(response.Redirect("/Welcome/GetCustomer", method: "GET"));
             }
 
             else if (digits == "1")
@@ -136,7 +136,7 @@ namespace BirovAm2015.Controllers
                     Order order = repo.GetOrderByCustomerId(customer.CustomerID);
                     if (order != null)
                     {
-                        response.Say("we found an order associated with this phone number, you will now be redirected to the review option");
+                        response.Say("we found an order associated with this phone number, you will now be redirected to the review option", voice: "alice", language: "en-US");
                         Session["customerId"] = customer.CustomerID;
                         Session["orderId"] = order.OrderID;
                         response.Redirect("/Review/ReviewOptions");

@@ -18,10 +18,10 @@ namespace BirovAm2015.Controllers
             return View();
         }
 
-        public TwiMLResult SearchForOrder(string From)
+        public TwiMLResult SearchForOrder(string From, string reEnter = "a")
         {
             var response = new VoiceResponse();
-            if (From == null)
+            if (From == null || From.Substring(2).Length != 10 || reEnter == "b")
             {
                 response.Gather(new Gather(action: "/Review/FindOrder", numDigits: 10)
                     .Say("Please enter your 10 digit phone number", voice: "alice", language: "en-US"));
@@ -61,11 +61,11 @@ namespace BirovAm2015.Controllers
             var response = new VoiceResponse();
             if (digits == "1")
             {
-                response.Redirect("/Review/SearchForOrder?From=" + null);
+                response.Redirect("/Review/SearchForOrder?reEnter=" + "b");
             }
             else
             {
-                response.Redirect("/Welcome/Welcome");
+                response.Redirect("/Welcome/Welcome", method: "GET");
             }
             return TwiML(response);
         }
@@ -99,7 +99,7 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "4")
             {
-                response.Redirect("/Welcome/Welcome");
+                response.Redirect("/Welcome/Welcome", method: "GET");
             }
             else
             {
@@ -164,7 +164,7 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "6")
             {
-                response.Redirect("/Welcome/Welcome");
+                response.Redirect("/Welcome/Welcome", method: "GET");
             }
             else
             {
@@ -423,7 +423,7 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "5")
             {
-                response.Redirect("/Welcome/Welcome");
+                response.Redirect("/Welcome/Welcome", method: "GET");
             }
             else
             {

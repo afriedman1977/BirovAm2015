@@ -54,6 +54,7 @@
     <Compile Include="Category.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Customer.cs" />
+    <Compile Include="CustomerRepository.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="BirovAmContext.cs" />
     <Compile Include="Order.cs" />

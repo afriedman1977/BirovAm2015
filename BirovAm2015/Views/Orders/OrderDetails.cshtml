@@ -11,7 +11,7 @@
                   Model.Customer.PhoneNumber.Substring(6, 4))</h4>
 <br />
 
-<table class="table">
+<table class="table table-bordered table-hover table-striped">
     <tr>
         <th>Item</th>
         <th>Description</th>
@@ -19,16 +19,28 @@
         <th>Price</th>
         <th>Quantity</th>
         <th>Total Price</th>
+        <th>Actions</th>
     </tr>
     @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true))
     {
-        <tr>
+        <tr data-orderDetail-id="@od.OrderDetailID">
             <td>@od.Product.ProductCode</td>
             <td>@od.Product.Description</td>
             <td>@od.Size.Size1</td>
             <td>@string.Format("{0:C}", od.Product.Price)</td>
             <td>@od.Quantity</td>
             <td>@string.Format("{0:C}", od.Price) </td>
+            <td>
+                <div class="row" style="width:100px">
+                    <div class="col-md-5"> <button class="btn btn-primary editOrderDetail">Edit</button></div>
+                    <div class="col-md-5 col-md-offset-2">
+                        <form action="/Orders/DeleteOrderDetail" method="POST" id="delete-orderDetail">
+                            <input type="hidden" name="custId" value="@od.OrderDetailID" />
+                            <button class="btn btn-danger delete-orderDetail">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </td>
         </tr>
     }
 </table>
