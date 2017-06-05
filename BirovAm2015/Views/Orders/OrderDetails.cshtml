@@ -1,51 +1,125 @@
 ﻿@using BirovAm.data;
 @model Order
-<h2>OrderDetails for Order Number - @Model.OrderID</h2>
-<br />
 
-<h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
-<h4>Address - @Model.Customer.Address</h4>
-<h4>Phone Number - @string.Format("({0}) {1}-{2}",
+<div id="order-details">
+    <h2>OrderDetails for Order Number - @Model.OrderID</h2>
+    <br />
+    <h2>{{notice}}</h2>
+    <h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
+    <h4>Address - @Model.Customer.Address</h4>
+    <h4>
+        Phone Number - @string.Format("({0}) {1}-{2}",
                   Model.Customer.PhoneNumber.Substring(0, 3),
                   Model.Customer.PhoneNumber.Substring(3, 3),
-                  Model.Customer.PhoneNumber.Substring(6, 4))</h4>
-<br />
+                  Model.Customer.PhoneNumber.Substring(6, 4))
+    </h4>
+    <br />
 
-<table class="table table-bordered table-hover table-striped">
-    <tr>
-        <th>Item</th>
-        <th>Description</th>
-        <th>Size</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Total Price</th>
-        <th>Actions</th>
-    </tr>
-    @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true))
-    {
-        <tr data-orderDetail-id="@od.OrderDetailID">
-            <td>@od.Product.ProductCode</td>
-            <td>@od.Product.Description</td>
-            <td>@od.Size.Size1</td>
-            <td>@string.Format("{0:C}", od.Product.Price)</td>
-            <td>@od.Quantity</td>
-            <td>@string.Format("{0:C}", od.Price) </td>
-            <td>
-                <div class="row" style="width:100px">
-                    <div class="col-md-5"> <button class="btn btn-primary editOrderDetail">Edit</button></div>
-                    <div class="col-md-5 col-md-offset-2">
-                        <form action="/Orders/DeleteOrderDetail" method="POST" id="delete-orderDetail">
-                            <input type="hidden" name="custId" value="@od.OrderDetailID" />
-                            <button class="btn btn-danger delete-orderDetail">Delete</button>
-                        </form>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4" style="margin-bottom:10px">
+            <button class="btn btn-primary btn-block" id="add-item" v-on:click="addItem()">Add Item</button>
+        </div>
+    </div>
+    <table class="table table-bordered table-hover table-striped">
+        <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Actions</th>
+        </tr>
+        @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true))
+        {
+            <tr data-orderDetail-id="@od.OrderDetailID">
+                <td>@od.Product.ProductCode</td>
+                <td>@od.Product.Description</td>
+                <td v-if="edit != @od.OrderDetailID">@od.Size.Size1</td>
+                <td v-else>
+                    <select v-model="selectedSize" v-on:change="updateSize(@od.OrderDetailID, @Model.OrderID)">
+                        <option v-for="size in Sizes" v-bind:value="size.SizeID">
+                            {{size.Size1}}
+                        </option>
+                    </select>
+                </td>
+                <td>@string.Format("{0:C}", od.Product.Price)</td>
+                <td v-if="edit != @od.OrderDetailID">@od.Quantity</td>
+                <td v-else>
+                    <select v-model="selectedQty" v-on:change="updateQuantity(@od.OrderDetailID)">
+                        <option v-for="qty in Quantities">
+                            {{qty}}
+                        </option>
+                    </select>
+                </td>
+                <td>@string.Format("{0:C}", od.Price) </td>
+                <td>
+                    <div class="row" style="width:100px">
+                        <div class="col-md-5"> <button class="btn btn-primary editOrderDetail" v-on:click="editItem(@od.Product.ProductID,@od.Size.SizeID,@od.OrderDetailID,@od.Quantity)">Edit</button></div>
+                        <div class="col-md-5 col-md-offset-2">
+                            <form action="/Orders/DeleteOrderDetail" method="POST" id="delete-orderDetail">
+                                <input type="hidden" name="odId" value="@od.OrderDetailID" />
+                                <input type="hidden" name="oId" value="@Model.OrderID"/>
+                                <button class="btn btn-danger delete-orderDetail">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </table>
+
+    <h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
+    <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.TotalCost)</h4>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="add-item-modal">
+        <div class="modal-dialog">
+            <form method="POST" action="/Orders/AddDetail">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title-category">Add Item</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="style-number">Product</label>
+                            <select v-model="selectedProduct" v-on:change="addSize(@Model.OrderID)" name="ProductID">
+                                <option v-for="product in Products" v-bind:value="product.ProductID">
+                                    {{product.StyleNumber}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="style-number">Size</label>
+                            <select v-model="selectedSize" v-on:change="getQuantity" name="SizeID">
+                                <option v-for="size in Sizes" v-bind:value="size.SizeID">
+                                    {{size.Size1}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="style-number">Quantity</label>
+                            <select v-model="selectedQty" name="Quantity">
+                                <option v-for="qty in Quantities">
+                                    {{qty}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" name="OrderID" value="@Model.OrderID"/>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button class="btn btn-primary" id="submit-add-item">Add Item</button>
                     </div>
                 </div>
-            </td>
-        </tr>
-    }
-</table>
+            </form><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
 
-<h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
-<h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.TotalCost)</h4>
+@section scripts{
+    <script src="~/Scripts/vue.min.js"></script>
+    <script src="~/Scripts/OrderDetails.js"></script>
+}
 
 
