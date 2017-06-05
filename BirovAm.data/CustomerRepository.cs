@@ -13,7 +13,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Customers.Where(c => c.DeleteFlag != true).ToList();
+                return ctx.Customers.Include(c => c.Orders).Where(c => c.DeleteFlag != true).ToList();
             }
         }
 

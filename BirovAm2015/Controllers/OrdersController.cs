@@ -18,6 +18,22 @@ namespace BirovAm2015.Controllers
             return View(repo.GetAllOrders());
         }
 
+        [HttpPost]
+        public ActionResult AddOrder(int custId)
+        {
+            Order o = new Order
+            {
+                CustomerID = custId,
+                OrderDate = DateTime.Now,
+                TotalQuantity = 0,
+                TotalCost = 0,
+                TotalAmountPaid = 0
+            };
+            var repo = new OrdersRepository();
+            repo.AddOrder(o);
+            return Redirect("/Orders/AllOrders");
+        }
+
         public ActionResult OrderDetails(int orderId)
         {
             OrdersRepository repo = new OrdersRepository();

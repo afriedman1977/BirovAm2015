@@ -54,6 +54,15 @@
                         <button class="btn btn-danger delete-customer">Delete</button>
                     </form>
                 </div>
+                @if (c.Orders.Count == 0)
+                {
+                    <div class="col-md-5 col-md-offset-2" style="margin-top:5px"> 
+                        <form action="/Orders/AddOrder" method="POST">
+                            <input type="hidden" name="custId" value="@c.CustomerID" />
+                            <button class="btn btn-primary add-order">Add Order</button>
+                        </form>
+                    </div>
+                }
             </div>
         </td>
     </tr>

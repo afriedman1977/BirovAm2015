@@ -52,4 +52,11 @@
         $("#customer-id").val(null);
         $("#Message-URL").val(null);
     }
+
+    $(".add-order").click(function () {
+        var customer = $(this).closest('tr').find('td:eq(3)').text();
+        if (!confirm("Do you want to add order for - " + customer )) {
+            return false;
+        }
+    });
 });

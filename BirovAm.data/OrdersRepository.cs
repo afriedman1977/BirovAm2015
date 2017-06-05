@@ -17,6 +17,15 @@ namespace BirovAm.data
             }
         }
 
+        public void AddOrder(Order o)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                ctx.Orders.Add(o);
+                ctx.SaveChanges();
+            }
+        }
+
         public Order GetOrderWithDetailsByOrderId(int oId)
         {
             using (var ctx = new BirovAmContext())
