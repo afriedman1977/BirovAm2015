@@ -27,6 +27,8 @@ namespace BirovAm.data
         [StringLength(50)]
         public string Size1 { get; set; }
 
+        public bool? DeleteFlag { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 

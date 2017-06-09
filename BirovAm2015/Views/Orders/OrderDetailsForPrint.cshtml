@@ -36,7 +36,7 @@
         <th>Quantity</th>
         <th>Total Price</th>
     </tr>
-    @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true))
+    @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode))
     {
         <tr>
             <td>@od.Product.ProductCode</td>

@@ -119,6 +119,14 @@ namespace BirovAm2015.Controllers
         }
 
         [HttpPost]
+        public ActionResult DeleteSize(int sId)
+        {
+            var repo = new ProductsRepository();
+            repo.DeleteSize(sId);
+            return Redirect("/Products/Sizes");
+        }
+
+        [HttpPost]
         public ActionResult AddProduct(Product p, HttpPostedFileBase SoundFile)
         {
             if (SoundFile != null)

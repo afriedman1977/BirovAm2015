@@ -11,4 +11,11 @@
         })
         $("#search").val("");
     })
+
+    $(".delete-order").click(function () {
+        var order = $(this).closest('tr').find('td:eq(0)').text();
+        if (!confirm("Do you want to delete Order Number - " + order)) {
+            return false;
+        }
+    });
 });

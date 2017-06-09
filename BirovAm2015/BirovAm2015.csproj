@@ -266,6 +266,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="App_Browsers\qt.browser" />
+    <None Include="Properties\PublishProfiles\BirovAmCode.pubxml" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
     <Content Include="Scripts\customers.js" />
     <Content Include="Scripts\jquery-3.1.1.js" />
@@ -311,6 +312,7 @@
     <Content Include="Views\Orders\OrderDetails.cshtml" />
     <Content Include="Views\Orders\OrderDetailsForPrint.cshtml" />
     <Content Include="Views\Customers\AllCustomers.cshtml" />
+    <Content Include="Views\Customers\Messages.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

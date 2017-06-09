@@ -25,6 +25,8 @@ namespace BirovAm.data
         [StringLength(250)]
         public string CategoryDescription { get; set; }
 
+        public bool? DeleteFlag { get; set; }
+
         [NotMapped]
         public bool Included { get; set; }
 

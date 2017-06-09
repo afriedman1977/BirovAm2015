@@ -13,7 +13,8 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Orders.Include(o => o.Customer).ToList();
+                var date = new DateTime(2017, 5, 20);
+                return ctx.Orders.Include(o => o.Customer).Where(o => o.DeleteFlag != true && o.OrderDate > date).ToList();
             }
         }
 
@@ -23,6 +24,20 @@ namespace BirovAm.data
             {
                 ctx.Orders.Add(o);
                 ctx.SaveChanges();
+            }
+        }
+
+        public void DeleteOrder(int oId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                var order = ctx.Orders.Where(o => o.OrderID == oId).FirstOrDefault();
+                order.DeleteFlag = true;
+                ctx.SaveChanges();
+                foreach(OrderDetail od in order.OrderDetails)
+                {
+                    DeleteOrderDetail(od.OrderDetailID);
+                }
             }
         }
 
@@ -38,7 +53,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Sizes.Where(s => s.ProductsSizes.Any(ps => ps.ProductID == productId)).ToList();
+                return ctx.Sizes.Where(s => s.ProductsSizes.Any(ps => ps.ProductID == productId) && s.DeleteFlag != true).ToList();
             }
         }
 
@@ -46,9 +61,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                //var details = ctx.OrderDetails.Where(od => od.OrderID == oId).ToList();
-                return ctx.Products.ToList();
-                //return products.Where(p => !(details.Any(od => od.ProductID == p.ProductID))).ToList();
+                return ctx.Products.Where(p => p.DeleteFlag != true).ToList();
             }
         }
 
@@ -56,7 +69,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                var sizes = ctx.Sizes.Where(s => s.ProductsSizes.Any(ps => ps.ProductID == productId && ps.Stock > 5)).ToList();
+                var sizes = ctx.Sizes.Where(s => s.ProductsSizes.Any(ps => ps.ProductID == productId && ps.Stock > 5) && s.DeleteFlag != true).ToList();
                 var details = ctx.OrderDetails.Where(od => od.OrderID == oId && od.DeleteFlag != true).ToList();
                 return sizes.Where(s => !(details.Any(od => od.SizeID == s.SizeID))).ToList();
             }

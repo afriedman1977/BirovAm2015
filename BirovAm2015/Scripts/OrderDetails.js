@@ -60,8 +60,11 @@
         updateSize: function (orderDetailId, orderId) {
             var self = this;
             $.post("/Orders/UpdateSize", { odId: orderDetailId, sId: self.selectedSize, oId: orderId }, function (response) {
-                self.notice = response;
-                if (self.notice == "") {
+                //self.notice = response;
+                if (response != "") {
+                    alert(response)
+                }
+                if (response == "") {
                     window.location.reload();
                 }
             });
@@ -73,13 +76,22 @@
         updateQuantity: function (orderDetailId) {
             var self = this;
             $.post("/Orders/UpdateQuantity", { odId: orderDetailId, qty: self.selectedQty }, function (response) {
-                self.notice = response;
-                if (self.notice == "") {
+                //self.notice = response;
+                if (response != "") {
+                    alert(response)
+                }
+                if (response == "") {
                     window.location.reload();
                 }
             });
             this.edit = null;
             this.Sizes = [];
+        },
+
+        cancel: function () {
+            this.edit = null;
+            this.Sizes = [];
+            this.Quantities = [];
         }
     }
 })

@@ -13,7 +13,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Customers.Include(c => c.Orders).Where(c => c.DeleteFlag != true).ToList();
+                return ctx.Customers.Include(c => c.Orders).Where(c => c.DeleteFlag != true).OrderBy(c => c.LastName).ToList();
             }
         }
 
@@ -50,6 +50,14 @@ namespace BirovAm.data
                 var customer = ctx.Customers.Where(c => c.CustomerID == custId).FirstOrDefault();
                 customer.DeleteFlag = true;
                 ctx.SaveChanges();
+            }
+        }
+
+        public List<Message> AllMessages()
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                return ctx.Messages.ToList();
             }
         }
     }

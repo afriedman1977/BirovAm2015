@@ -55,5 +55,11 @@ namespace BirovAm2015.Controllers
             repo.DeleteCustomer(custId);
             return Redirect("/Customers/AllCustomers");
         }
+
+        public ActionResult Messages()
+        {
+            var repo = new CustomerRepository();
+            return View(repo.AllMessages());
+        }
     }
 }

@@ -101,7 +101,7 @@
                         <div class="form-group col-md-4">
                             <label for="category">Category</label>
                             <select id="category" name="CategoryID">
-                                @foreach (Category c in Model.Categories)
+                                @foreach (Category c in Model.Categories.Where(c => c.DeleteFlag != true))
                                 {
                                     <option value="@c.CategoryID" data-category-id="@c.CategoryID">@c.CategoryName</option>
                                 }

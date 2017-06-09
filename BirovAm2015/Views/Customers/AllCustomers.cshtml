@@ -9,6 +9,7 @@
 </div>
 
 <div class="row" style="margin-bottom:10px">
+    <div class="col-md-2"><a class="btn btn-info" href="/Customers/Messages">Messages</a></div>
     <div class="col-md-offset-5">
         <input type="text" id="search" placeholder="Phone Number" />
         <button class="btn btn-info" id="clear">Clear</button>
@@ -54,7 +55,7 @@
                         <button class="btn btn-danger delete-customer">Delete</button>
                     </form>
                 </div>
-                @if (c.Orders.Count == 0)
+                @if (c.Orders.Where(o => o.DeleteFlag != true && o.OrderDate > new DateTime(2017,5,20)).Count() == 0)
                 {
                     <div class="col-md-5 col-md-offset-2" style="margin-top:5px"> 
                         <form action="/Orders/AddOrder" method="POST">

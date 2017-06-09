@@ -32,7 +32,8 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 Category c = ctx.Categories.Where(x => x.CategoryID == cId).FirstOrDefault();
-                ctx.Entry(c).State = EntityState.Deleted;
+                //ctx.Entry(c).State = EntityState.Deleted;
+                c.DeleteFlag = true;
                 ctx.SaveChanges();
             }
         }
@@ -78,7 +79,8 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 Size s = ctx.Sizes.Where(si => si.SizeID == sId).FirstOrDefault();
-                ctx.Entry(s).State = EntityState.Deleted;
+                //ctx.Entry(s).State = EntityState.Deleted;
+                s.DeleteFlag = true;
                 ctx.SaveChanges();
             }
         }
@@ -145,7 +147,8 @@ namespace BirovAm.data
                     ctx.Entry(pr).State = EntityState.Deleted;
                 }
                 Product p = ctx.Products.Where(x => x.ProductID == pId).FirstOrDefault();
-                ctx.Entry(p).State = EntityState.Deleted;
+                // ctx.Entry(p).State = EntityState.Deleted;
+                p.DeleteFlag = true;
                 ctx.SaveChanges();
             }
         }
@@ -154,7 +157,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Categories.ToList();
+                return ctx.Categories.Where(c => c.DeleteFlag != true).ToList();
             }
         }
 
@@ -170,7 +173,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Sizes.Include(s => s.Categories).OrderBy(s => s.SizeCode).ToList();
+                return ctx.Sizes.Include(s => s.Categories).Where(s => s.DeleteFlag != true).OrderBy(s => s.SizeCode).ToList();
             }
         }
 
@@ -187,7 +190,7 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 ctx.Configuration.LazyLoadingEnabled = false;
-                return ctx.Products.Include(p => p.ProductsSizes.Select(x => x.Size)).OrderBy(p => p.ProductCode).ToList();
+                return ctx.Products.Include(p => p.ProductsSizes.Select(x => x.Size)).Where(p => p.DeleteFlag != true).OrderBy(p => p.ProductCode).ToList();
             }
         }
 

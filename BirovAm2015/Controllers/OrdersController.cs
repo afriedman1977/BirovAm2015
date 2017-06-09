@@ -34,6 +34,14 @@ namespace BirovAm2015.Controllers
             return Redirect("/Orders/AllOrders");
         }
 
+        [HttpPost]
+        public ActionResult DeleteOrder(int oId)
+        {
+            var repo = new OrdersRepository();
+            repo.DeleteOrder(oId);
+            return Redirect("/Orders/AllOrders");
+        }
+
         public ActionResult OrderDetails(int orderId)
         {
             OrdersRepository repo = new OrdersRepository();

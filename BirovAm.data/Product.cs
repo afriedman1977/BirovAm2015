@@ -39,6 +39,8 @@ namespace BirovAm.data
 
         public string SoundFilePath { get; set; }
 
+        public bool? DeleteFlag { get; set; }
+
         public virtual Category Category { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

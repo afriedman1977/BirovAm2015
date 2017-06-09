@@ -18,6 +18,7 @@
         <th>Order Date</th>
         <th>Total Cost</th>
         <th>Actions</th>
+        <th>Print</th>
     </tr>
     @foreach (Order o in Model)
     {
@@ -32,9 +33,19 @@
             <td>@o.OrderDate.ToShortDateString()</td>
             <td>@string.Format("{0:C}", o.TotalCost)</td>
             <td>
-                <a href="/Orders/OrderDetails?orderId=@o.OrderID" class="btn btn-primary">Order Details</a>
-                <a href="/Orders/PrintInvoice?orderId=@o.OrderID" class="btn btn-success">Print</a>
+                <div class="row">
+                    <div class="col-sm-4 col-sm-offset-1">
+                        <a href="/Orders/OrderDetails?orderId=@o.OrderID" class="btn btn-primary">Details</a>
+                    </div>
+                    <div class="col-sm-4 col-sm-offset-1">
+                        <form action="/Orders/DeleteOrder" method="POST">
+                            <input type="hidden" name="oId" value="@o.OrderID" />
+                            <button class="btn btn-danger delete-order">Delete</button>
+                        </form>
+                    </div>
+                </div>
             </td> 
+            <td><a href="/Orders/PrintInvoice?orderId=@o.OrderID" class="btn btn-success">Print</a></td>
         </tr>
     }
 </table>
