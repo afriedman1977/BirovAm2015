@@ -13,7 +13,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                var date = new DateTime(2017, 5, 20);
+                var date = new DateTime(2016, 5, 20);
                 return ctx.Orders.Include(o => o.Customer).Where(o => o.DeleteFlag != true && o.OrderDate > date).ToList();
             }
         }

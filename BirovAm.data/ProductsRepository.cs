@@ -190,7 +190,7 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 ctx.Configuration.LazyLoadingEnabled = false;
-                return ctx.Products.Include(p => p.ProductsSizes.Select(x => x.Size)).Where(p => p.DeleteFlag != true).OrderBy(p => p.ProductCode).ToList();
+                return ctx.Products.Include(p => p.ProductsSizes.Select(x => x.Size)).Include(p => p.Category).Where(p => p.DeleteFlag != true).OrderBy(p => p.ProductCode).ToList();
             }
         }
 

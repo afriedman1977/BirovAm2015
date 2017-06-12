@@ -20,6 +20,7 @@
         <th>Style No.</th>
         <th>Brand</th>
         <th>Description</th>
+        <th>Category</th>
         <th>Sizes</th>
         <th>Price</th>
         <th>Actions</th>
@@ -32,6 +33,7 @@
             <td>@p.StyleNumber</td>
             <td>@p.Brand</td>
             <td>@p.Description</td>
+            <td>@p.Category.CategoryName</td>
             <td>
                 @foreach (ProductsSize s in p.ProductsSizes.OrderBy(x => x.Size.Size1))
                 {

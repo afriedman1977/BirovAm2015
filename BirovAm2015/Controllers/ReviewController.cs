@@ -11,7 +11,7 @@ namespace BirovAm2015.Controllers
 {
     public class ReviewController : TwilioController
     {
-        private static int _index;
+       // private static int _index;
         // GET: Review
         public ActionResult Index()
         {
@@ -72,7 +72,8 @@ namespace BirovAm2015.Controllers
 
         public TwiMLResult ReviewOptions()
         {
-            _index = 0;
+            Session["Index"] = 0;
+           // _index = 0;
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Review/ReviewChoice", numDigits: 1)
                 .Say("To review your entire order press 1, to review a specific item in your order press 2, to add an item to your order press 3,"
@@ -119,16 +120,16 @@ namespace BirovAm2015.Controllers
                 response.Say("We could not find any items in this order", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
-            else if (_index == orderDetails.Count)
+            else if ((int)Session["Index"] == orderDetails.Count)
             {
                 response.Say("there are no more items to review", voice: "alice", language: "en-US");
                 response.Redirect("/Review/ReviewOptions");
             }
             else
             {
-                Session["OrderDetailID"] = orderDetails[_index].OrderDetailID;
+                Session["OrderDetailID"] = orderDetails[(int)Session["Index"]].OrderDetailID;
                 response.Gather(new Gather(action: "/Review/ChooseEdit", numDigits: 1)
-                    .Say("you chose " + orderDetails[_index].Quantity + ", " + orderDetails[_index].Product.Description + ", size " + orderDetails[_index].Size.Size1
+                    .Say("you chose " + orderDetails[(int)Session["Index"]].Quantity + ", " + orderDetails[(int)Session["Index"]].Product.Description + ", size " + orderDetails[(int)Session["Index"]].Size.Size1
                     + ". to change the quantity press 1, to change the size press 2, to delete this item from your cart "
                     + "press 3, to hear the next item in your cart press 4, to return to the previous menu press 5, to return to "
                     + "the main menu press 6.", voice: "alice", language: "en-US"));
@@ -155,7 +156,9 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "4")
             {
-                _index++;
+                int x = (int)Session["Index"];
+                x++;
+                Session["Index"] = x;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else if (digits == "5")
@@ -214,7 +217,9 @@ namespace BirovAm2015.Controllers
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateQuantity(qty, (int)Session["OrderDetailID"]);
                 response.Say("Quantity successfully updated.", voice: "alice", language: "en-US");
-                _index++;
+                int x = (int)Session["Index"];
+                x++;
+                Session["Index"] = x;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else if (digits == "3")
@@ -260,13 +265,17 @@ namespace BirovAm2015.Controllers
             {
                 response.Say("you already have this item in size " + size.Size1 + " in your order, to make changes to that item find it from the review menu "
                     + " and edit it.", voice: "alice", language: "en-US");
-                _index++;
+                int x = (int)Session["Index"];
+                x++;
+                Session["Index"] = x;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else if(repo.OutOfStock((int)Session["OrderDetailID"], 0, size.SizeID))
             {
                 response.Say("I'm sorry but you can't change the size of this item, since there is not enough stock in the size you chose", voice: "alice", language: "en-US");
-                _index++;
+                int x = (int)Session["Index"];
+                x++;
+                Session["Index"] = x;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else
@@ -290,7 +299,9 @@ namespace BirovAm2015.Controllers
             {
                 ReviewRepository repo = new ReviewRepository();
                 repo.UpdateSize(sizeId, (int)Session["OrderDetailID"]);
-                _index++;
+                int x = (int)Session["Index"];
+                x++;
+                Session["Index"] = x; ;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else
@@ -326,7 +337,9 @@ namespace BirovAm2015.Controllers
             else if (digits == "2")
             {
                 response.Say("Delete canceled.", voice: "alice", language: "en-US");
-                _index++;
+                int x = (int)Session["Index"];
+                x++;
+                Session["Index"] = x;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             else

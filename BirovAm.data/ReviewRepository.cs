@@ -13,7 +13,8 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.Orders.Include(o => o.Customer).Where(o => o.Customer.PhoneNumber == phoneNumber).FirstOrDefault();
+                var date = new DateTime(2016, 5, 20);
+                return ctx.Orders.Include(o => o.Customer).Where(o => o.Customer.PhoneNumber == phoneNumber && o.DeleteFlag != true && o.OrderDate > date).FirstOrDefault();
             }
         }
 
@@ -21,7 +22,7 @@ namespace BirovAm.data
         {
             using (var ctx = new BirovAmContext())
             {
-                return ctx.OrderDetails.Include(od => od.Product).Include(od => od.Size).Where(od => od.OrderID == orderId && od.DeleteFlag != true).ToList();
+                return ctx.OrderDetails.Include(od => od.Product).Include(od => od.Size).Where(od => od.OrderID == orderId && od.DeleteFlag != true).OrderBy(d => d.Product.ProductCode).ToList();
             }
         }
 

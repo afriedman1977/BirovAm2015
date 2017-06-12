@@ -14,7 +14,6 @@ namespace BirovAm2015.Controllers
         public ActionResult AllOrders()
         {
             OrdersRepository repo = new OrdersRepository();
-            //Order o = repo.GetOrderWithDetailsByOrderId(1004);
             return View(repo.GetAllOrders());
         }
 
@@ -31,7 +30,7 @@ namespace BirovAm2015.Controllers
             };
             var repo = new OrdersRepository();
             repo.AddOrder(o);
-            return Redirect("/Orders/AllOrders");
+            return Redirect("/Orders/OrderDetails?orderId=" + o.OrderID);
         }
 
         [HttpPost]
