@@ -33,7 +33,7 @@ namespace BirovAm2015.Controllers
                 response.Gather(new Gather(action: "/Sales/ConfirmItem?pID=" + product.ProductID + "&price=" + product.Price + "&itemCode=" + digits, numDigits: 1)
                     .Say("You have chosen, " + product.Description + " . to confirm choice, press 1 ."
                    + " to cancel press 2.", voice: "alice", language: "en-US"));
-                response.Redirect("/Sales/Choose?digits=" + digits);
+                response.Redirect("/Sales/ChooseItem?digits=" + digits);
             }
             return TwiML(response);
         }

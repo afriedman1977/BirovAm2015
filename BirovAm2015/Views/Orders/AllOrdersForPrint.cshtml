@@ -1,0 +1,162 @@
+﻿
+@{
+    Layout = null;
+}
+
+@using BirovAm.data;
+@model List<Order>
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <title>All Orders For Print</title>
+</head>
+<body>
+
+   
+        @foreach (Order o in Model)
+        {
+            if (o.OrderDetails.Count < 8)
+            {
+            <div style="min-height:1265px">
+                <div style="min-height:1250px">
+                    <h2>Order Number - @o.OrderID</h2>
+                    <br />
+
+                    <h4>Name - @o.Customer.FirstName @o.Customer.LastName</h4>
+                    <h4>Address - @o.Customer.Address</h4>
+                    <h4>
+                        Phone Number - @string.Format("({0}) {1}-{2}",
+o.Customer.PhoneNumber.Substring(0, 3),
+o.Customer.PhoneNumber.Substring(3, 3),
+o.Customer.PhoneNumber.Substring(6, 4))
+                    </h4>
+                    <br />
+
+                    <table class="table">
+                        <tr>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Size</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                        </tr>
+                        @foreach (OrderDetail od in o.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode))
+                        {
+                            <tr>
+                                <td>@od.Product.ProductCode</td>
+                                <td>@od.Product.Description</td>
+                                <td>@od.Size.Size1</td>
+                                <td>@string.Format("{0:C}", od.Product.Price)</td>
+                                <td>@od.Quantity</td>
+                                <td>@string.Format("{0:C}", od.Price)</td>
+                            </tr>
+                        }
+                    </table>
+
+                    <h4 style="text-align:right">Total Items = @o.TotalQuantity</h4>
+                    <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", o.TotalCost)</h4>
+                </div>
+                <h4 style="text-align:center">page 1/1</h4>
+            </div>
+            }
+            else
+            {
+                <div style="min-height:1265px">
+                    <div style="min-height:1250px">
+                        <h2>Order Number - @o.OrderID</h2>
+                        <br />
+
+                        <h4>Name - @o.Customer.FirstName @o.Customer.LastName</h4>
+                        <h4>Address - @o.Customer.Address</h4>
+                        <h4>
+                            Phone Number - @string.Format("({0}) {1}-{2}",
+o.Customer.PhoneNumber.Substring(0, 3),
+o.Customer.PhoneNumber.Substring(3, 3),
+o.Customer.PhoneNumber.Substring(6, 4))
+                        </h4>
+                        <br />
+
+                        <table class="table">
+                            <tr>
+                                <th>Item</th>
+                                <th>Description</th>
+                                <th>Size</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total Price</th>
+                            </tr>
+                            @foreach (OrderDetail od in o.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode).Take(8))
+                            {
+                                <tr>
+                                    <td>@od.Product.ProductCode</td>
+                                    <td>@od.Product.Description</td>
+                                    <td>@od.Size.Size1</td>
+                                    <td>@string.Format("{0:C}", od.Product.Price)</td>
+                                    <td>@od.Quantity</td>
+                                    <td>@string.Format("{0:C}", od.Price)</td>
+                                </tr>
+                            }
+                        </table>
+
+                        @*<h4 style="text-align:right">Total Items = @o.TotalQuantity</h4>
+                        <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", o.TotalCost)</h4>*@
+                    </div>
+                    <h4 style="text-align:center">page 1/2</h4>
+                </div>
+                <div style="min-height:1265px">
+                    <div style="min-height:1250px">
+                        <h2>Order Number - @o.OrderID</h2>
+                        <br />
+
+                        <h4>Name - @o.Customer.FirstName @o.Customer.LastName</h4>
+                        <h4>Address - @o.Customer.Address</h4>
+                        <h4>
+                            Phone Number - @string.Format("({0}) {1}-{2}",
+o.Customer.PhoneNumber.Substring(0, 3),
+o.Customer.PhoneNumber.Substring(3, 3),
+o.Customer.PhoneNumber.Substring(6, 4))
+                        </h4>
+                        <br />
+
+                        <table class="table">
+                            <tr>
+                                <th>Item</th>
+                                <th>Description</th>
+                                <th>Size</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total Price</th>
+                            </tr>
+                            @foreach (OrderDetail od in o.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode).Skip(8))
+                            {
+                                <tr>
+                                    <td>@od.Product.ProductCode</td>
+                                    <td>@od.Product.Description</td>
+                                    <td>@od.Size.Size1</td>
+                                    <td>@string.Format("{0:C}", od.Product.Price)</td>
+                                    <td>@od.Quantity</td>
+                                    <td>@string.Format("{0:C}", od.Price)</td>
+                                </tr>
+                            }
+                        </table>
+
+                        <h4 style="text-align:right">Total Items = @o.TotalQuantity</h4>
+                        <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", o.TotalCost)</h4>
+                    </div>
+                    <h4 style="text-align:center">page 2/2</h4>
+                </div>
+            }
+
+        }
+
+
+
+
+
+</body>
+</html>

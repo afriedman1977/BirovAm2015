@@ -31,7 +31,7 @@
             <th>Total Price</th>
             <th>Actions</th>
         </tr>
-        @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode))
+        @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode).ThenBy(d => d.Size.SizeID))
         {
             <tr data-orderDetail-id="@od.OrderDetailID">
                 <td>@od.Product.ProductCode</td>

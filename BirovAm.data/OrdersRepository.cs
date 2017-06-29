@@ -14,7 +14,7 @@ namespace BirovAm.data
             using (var ctx = new BirovAmContext())
             {
                 var date = new DateTime(2016, 5, 20);
-                return ctx.Orders.Include(o => o.Customer).Where(o => o.DeleteFlag != true && o.OrderDate > date).ToList();
+                return ctx.Orders.Include(o => o.Customer).Include(o => o.OrderDetails.Select(d => d.Product)).Include(o => o.OrderDetails.Select(d => d.Size)).Where(o => o.DeleteFlag != true && o.OrderDate > date).ToList();
             }
         }
 
@@ -113,6 +113,40 @@ namespace BirovAm.data
                 od.Order.TotalCost = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID && x.DeleteFlag != true).Sum(x => x.Price);
                 od.Order.TotalQuantity = ctx.OrderDetails.Where(x => x.OrderID == od.Order.OrderID && x.DeleteFlag != true).Sum(x => x.Quantity);
                 ctx.SaveChanges();
+            }
+        }
+
+        public List<ProductsSold> ProductsSold()
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                List<ProductsSold> ps = new List<ProductsSold>();
+                List<ProductsSize> productSizes = ctx.ProductsSizes.Include(x => x.Product).Include(x => x.Size).ToList();
+                foreach(ProductsSize prs in productSizes)                //(ProductsSize prs in ctx.ProductsSizes.Include(p => p.Product).Include(p => p.Size).ToList())
+                {
+                   // int? amount = ctx.OrderDetails.Where(od => od.ProductID == prs.ProductID && od.SizeID == prs.SizeID && od.DeleteFlag != true).Sum(od => od.Quantity.Value);
+                    ps.Add(new ProductsSold
+                    {
+                        ProductCode = prs.Product.ProductCode,
+                        Size = prs.Size.Size1,
+                        AmountSold = Sum(prs.ProductID, prs.SizeID)
+                        //ctx.OrderDetails.Where(od => od.ProductID == prs.ProductID && od.SizeID == prs.SizeID && od.DeleteFlag != true).Sum(od => od.Quantity.Value) > 0?
+                        //ctx.OrderDetails.Where(od => od.ProductID == prs.ProductID && od.SizeID == prs.SizeID && od.DeleteFlag != true).Sum(od => od.Quantity.Value): 0
+                    });
+                }
+                return ps;
+            }
+        }
+
+        private int Sum(int pId, int sId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                if(ctx.OrderDetails.Where(od => od.ProductID == pId && od.SizeID == sId && od.DeleteFlag != true).Count() > 0)
+                {
+                    return ctx.OrderDetails.Where(od => od.ProductID == pId && od.SizeID == sId && od.DeleteFlag != true).Sum(od => od.Quantity.Value);
+                }
+                return 0;
             }
         }
     }

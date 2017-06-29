@@ -18,7 +18,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <IISExpressSSLPort>44387</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -224,6 +224,7 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Controllers\CheckoutController.cs" />
     <Compile Include="Controllers\CustomersController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
@@ -313,10 +314,13 @@
     <Content Include="Views\Orders\OrderDetailsForPrint.cshtml" />
     <Content Include="Views\Customers\AllCustomers.cshtml" />
     <Content Include="Views\Customers\Messages.cshtml" />
+    <Content Include="Views\Orders\AllOrdersForPrint.cshtml" />
+    <Content Include="Views\Orders\ProductsOrderedCount.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="SoundFiles\" />
+    <Folder Include="Views\Checkout\" />
     <Folder Include="Views\Review\" />
     <Folder Include="Views\Sales\" />
     <Folder Include="Views\Welcome\" />

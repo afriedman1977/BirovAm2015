@@ -21,6 +21,7 @@ namespace BirovAm.data
         public virtual DbSet<Size> Sizes { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<ProductsSize> ProductsSizes { get; set; }
+        public virtual DbSet<PaymentRecord> PaymentRecords { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

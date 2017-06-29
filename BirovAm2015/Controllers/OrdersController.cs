@@ -17,6 +17,13 @@ namespace BirovAm2015.Controllers
             return View(repo.GetAllOrders());
         }
 
+        //public ActionResult CreditCard()
+        //{
+        //    var repo = new CheckoutRepository();
+        //   string response = repo.SubmitPayment();
+        //    return Redirect("/Orders/AllOrders");
+        //}
+
         [HttpPost]
         public ActionResult AddOrder(int custId)
         {
@@ -51,6 +58,17 @@ namespace BirovAm2015.Controllers
         {
             OrdersRepository repo = new OrdersRepository();
             return View(repo.GetOrderWithDetailsByOrderId(orderId));
+        }
+
+        public ActionResult AllOrdersForPrint()
+        {
+            OrdersRepository repo = new OrdersRepository();
+            return View(repo.GetAllOrders());
+        }
+
+        public ActionResult PrintAllInvoices()
+        {
+            return new ActionAsPdf("AllOrdersForPrint");
         }
 
         public ActionResult PrintInvoice(int orderId)
@@ -159,6 +177,12 @@ namespace BirovAm2015.Controllers
             var repo = new OrdersRepository();
             repo.DeleteOrderDetail(odId);
             return Redirect("/Orders/OrderDetails?orderId=" + oId);
+        }
+
+        public ActionResult ProductsOrderedCount()
+        {
+            var repo = new OrdersRepository();
+            return View(repo.ProductsSold());
         }
     }
 }
