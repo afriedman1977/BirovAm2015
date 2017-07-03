@@ -51,7 +51,16 @@ namespace BirovAm2015.Controllers
             {
                 Session["customerId"] = order.Customer.CustomerID;
                 Session["orderId"] = order.OrderID;
-                response.Redirect("/Review/ReviewOptions");
+                if (new ReviewRepository().GettotalAmountOwed((int)Session["orderId"]) > 0)
+                {
+                    response.Gather(new Gather(action: "/Review/ChooseCheckout?number=" + digits, numDigits: 1)
+                        .Say("We see you have items that were not paid for. to checkout now, press 1. to proceed to the review menu, press 2.", voice: "alice", language: "en-US"));
+                    response.Redirect("/Review/FindOrder?digits=" + digits);
+                }
+                else
+                {
+                    response.Redirect("/Review/ReviewOptions");
+                }
             }
             return TwiML(response);
         }
@@ -66,6 +75,25 @@ namespace BirovAm2015.Controllers
             else
             {
                 response.Redirect("/Welcome/Welcome", method: "GET");
+            }
+            return TwiML(response);
+        }
+
+        public TwiMLResult ChooseCheckout(string number, string digits)
+        {
+            var response = new VoiceResponse();
+            if(digits == "1")
+            {
+                response.Redirect("Checkout/EnterCCInfo");
+            }
+            else if(digits == "2")
+            {
+                response.Redirect("/Review/ReviewOptions");
+            }
+            else
+            {
+                response.Say("Invalid choice");
+                response.Redirect("/Review/FindOrder?digits=" + number);
             }
             return TwiML(response);
         }

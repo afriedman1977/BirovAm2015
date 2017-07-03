@@ -97,6 +97,11 @@ namespace BirovAm.data
                 .WithRequired(e => e.Order)
                 .WillCascadeOnDelete(false);
 
+            modelBuilder.Entity<Order>()
+                .HasMany(e => e.PaymentRecords)
+                .WithRequired(e => e.Order)
+                .WillCascadeOnDelete(false);
+
             modelBuilder.Entity<Product>()
                 .Property(e => e.ProductCode)
                 .IsUnicode(false);

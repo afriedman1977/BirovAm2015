@@ -138,5 +138,14 @@ namespace BirovAm.data
                 return ctx.OrderDetails.Include(d => d.Product).Include(d => d.Size).Where(d => d.OrderID == oId && d.Product.ProductCode == pCode && d.Size.SizeCode == sCode && d.DeleteFlag != true).FirstOrDefault();
             }
         }
+
+        public decimal GettotalAmountOwed(int oId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                var order = ctx.Orders.Where(o => o.OrderID == oId).FirstOrDefault();
+                return order.TotalCost.Value - order.TotalAmountPaid.Value;
+            }
+        }
     }
 }

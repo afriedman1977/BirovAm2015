@@ -12,6 +12,7 @@ namespace BirovAm.data
         public Order()
         {
             OrderDetails = new HashSet<OrderDetail>();
+            PaymentRecords = new HashSet<PaymentRecord>();
         }
 
         public int OrderID { get; set; }
@@ -34,5 +35,7 @@ namespace BirovAm.data
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+
+        public virtual ICollection<PaymentRecord> PaymentRecords { get; set; }
     }
 }

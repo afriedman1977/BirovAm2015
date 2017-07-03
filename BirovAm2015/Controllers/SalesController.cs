@@ -255,7 +255,7 @@ namespace BirovAm2015.Controllers
             }
             else if (digits == "2")
             {
-
+                response.Redirect("/Checkout/EnterCCInfo");
             }
             else if(digits == "3")
             {
