@@ -235,6 +235,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\EnterSizesViewModel.cs" />
+    <Compile Include="Models\OrderDetailsViewModel.cs" />
     <Compile Include="Models\ProductsIndexModel.cs" />
     <Compile Include="Models\SizesViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

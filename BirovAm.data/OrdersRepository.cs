@@ -138,6 +138,14 @@ namespace BirovAm.data
             }
         }
 
+        public List<PaymentRecord> PaymentRecordsForOrder(int oId)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                return ctx.PaymentRecords.Where(p => p.OrderID == oId).ToList();
+            }
+        }
+
         private int Sum(int pId, int sId)
         {
             using (var ctx = new BirovAmContext())

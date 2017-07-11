@@ -69,7 +69,7 @@ namespace BirovAm2015.Controllers
                         response.Say("we found an order associated with this phone number, you will now be redirected to the review option", voice: "alice", language: "en-US");
                         Session["customerId"] = customer.CustomerID;
                         Session["orderId"] = order.OrderID;
-                        response.Redirect("/Review/ReviewOptions");
+                        response.Redirect("/Review/CheckForBalanceOwed");
                         return TwiML(response);
                     }
                     else
@@ -139,7 +139,7 @@ namespace BirovAm2015.Controllers
                         response.Say("we found an order associated with this phone number, you will now be redirected to the review option", voice: "alice", language: "en-US");
                         Session["customerId"] = customer.CustomerID;
                         Session["orderId"] = order.OrderID;
-                        response.Redirect("/Review/ReviewOptions");
+                        response.Redirect("/Review/CheckForBalanceOwed");
                         return TwiML(response);
                     }
                     else

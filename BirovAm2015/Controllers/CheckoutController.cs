@@ -20,19 +20,38 @@ namespace BirovAm2015.Controllers
         public TwiMLResult EnterCCInfo()
         {
             var response = new VoiceResponse();
-            var total = new ReviewRepository().GettotalAmountOwed((int)Session["orderId"]).ToString().Split('.');
-            response.Gather(new Gather(action: "/Checkout/VerifyCCInfo", numDigits: 16)
-                .Say("The total due is," + total[0] + " ,dollars, and " + total[1] + ", cents. Please enter your 16 digit credit card number", voice: "alice", language: "en-US"));
-            response.Redirect("/Checkout/EnterCCInfo");
+            var total = new ReviewRepository().GettotalAmountOwed((int)Session["orderId"]);
+            if (total <= 0)
+            {
+                response.Say("You have nothing to checkout. you will be redirected now to the main menu", voice: "alice", language: "en-US");
+                response.Redirect("/Welcome/Welcome", method: "GET");
+            }
+            else
+            {
+                var total1 = total.ToString().Split('.');
+                response.Gather(new Gather(action: "/Checkout/VerifyCCInfo", numDigits: 16, timeout: 15)
+                    .Say("The total due is," + total1[0] + " ,dollars, and " + int.Parse(total1[1].Substring(0, 2)) + ", cents. We accept visa, and mastercard."
+                    + " Please enter your 16 digit credit card number", voice: "alice", language: "en-US"));
+                response.Redirect("/Checkout/EnterCCInfo");
+            }
             return TwiML(response);
         }
 
         public TwiMLResult VerifyCCInfo(string digits)
         {
             var response = new VoiceResponse();
-            response.Gather(new Gather(action: "/Checkout/ConfirmCCInfo?ccInfo=" + digits, numDigits: 1)
-                .Say("You entered," + LoopThroughDigits(digits) + ". to confirm press 1. to re-ënter your credit card number press 2", voice: "alice", language: "en-US"));
-            response.Redirect("Checkout/VerifyCCInfo?digits=" + digits);
+            if (digits.Length < 16)
+            {
+                response.Say("Invalid credit card number", voice: "alice", language: "en-US");
+                response.Redirect("/Checkout/EnterCCInfo");
+            }
+            else
+            {
+                var ccNumber = LoopThroughDigits(digits);
+                response.Gather(new Gather(action: "/Checkout/ConfirmCCInfo?ccInfo=" + digits, numDigits: 1)
+                    .Say("You entered," + ccNumber + ". to confirm press 1. to re-enter your credit card number press 2", voice: "alice", language: "en-US"));
+                response.Redirect("Checkout/VerifyCCInfo?digits=" + digits);
+            }
             return TwiML(response);
         }
 
@@ -41,8 +60,7 @@ namespace BirovAm2015.Controllers
             var response = new VoiceResponse();
             if (digits == "1")
             {
-                response.Redirect("Checkout/EnterExpDate?ccInfo=" + ccInfo);
-                //response .Gather(new Gather(action: "/Checkout/EnterExpDate?ccInfo=" + ccInfo,))
+                response.Redirect("/Checkout/EnterExpDate?ccInfo=" + ccInfo);
             }
             else if (digits == "2")
             {
@@ -51,7 +69,7 @@ namespace BirovAm2015.Controllers
             else
             {
                 response.Say("Invalid response");
-                response.Redirect("Checkout/VerifyCCInfo?digits=" + ccInfo);
+                response.Redirect("/Checkout/VerifyCCInfo?digits=" + ccInfo);
             }
             return TwiML(response);
         }
@@ -59,9 +77,9 @@ namespace BirovAm2015.Controllers
         public TwiMLResult EnterExpDate(string ccInfo)
         {
             var response = new VoiceResponse();
-            response.Gather(new Gather(action: "/Action/VerifyExpDate?ccInfo=" + ccInfo, numDigits: 4)
+            response.Gather(new Gather(action: "/Checkout/VerifyExpDate?ccInfo=" + ccInfo, numDigits: 4)
                 .Say("Please enter the expiration date. enter 2 digits for the month, and 2 digits for the year", voice: "alice", language: "en-US"));
-            response.Redirect("Checkout/EnterExpDate?ccInfo=" + ccInfo);
+            response.Redirect("/Checkout/EnterExpDate?ccInfo=" + ccInfo);
             return TwiML(response);
         }
 
@@ -69,8 +87,8 @@ namespace BirovAm2015.Controllers
         {
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Checkout/ConfirmExpDate?ccInfo=" + ccInfo + "&expDate=" + digits, numDigits: 1)
-                .Say("You enterd, " + GetMonth(digits.Substring(0, 2)) + GetYear(digits.Substring(2, 2)) + " To onfirm press 1, to try again press 2.", voice: "alice", language: "en-US"));
-            response.Redirect("/Action/VerifyExpDate?ccInfo=" + ccInfo + "&digits=" + digits);
+                .Say("You enterd, " + GetMonth(digits.Substring(0, 2)) + ". " + GetYear(digits.Substring(2, 2)) + " To confirm press 1, to try again press 2.", voice: "alice", language: "en-US"));
+            response.Redirect("/Checkout/VerifyExpDate?ccInfo=" + ccInfo + "&digits=" + digits);
             return TwiML(response);
         }
 
@@ -106,7 +124,7 @@ namespace BirovAm2015.Controllers
         {
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Checkout/ConfirmSecurityCode?ccInfo=" + ccInfo + "&expDate=" + expDate + "&code=" + digits, numDigits: 1)
-                .Say("You entered " + LoopThroughDigits(digits) + ". To confirm, press 1. to re-enter security code, press 2.", voice: "alice", language: "en-US"));
+                .Say("You entered, " + LoopThroughDigits(digits) + ". To confirm, press 1. to re-enter security code, press 2.", voice: "alice", language: "en-US"));
             response.Redirect("/Checkout/VerifySecurityCode?ccInfo=" + ccInfo + "&expDate=" + expDate + "&digits=" + digits);
             return TwiML(response);
         }
@@ -138,14 +156,19 @@ namespace BirovAm2015.Controllers
             var record = repo.SubmitPayment();
             if(record.Result == 0)
             {
-                repo.RecordPayment((int)Session["orderId"], total, record.Amount);
+                repo.RecordPayment((int)Session["orderId"], record.Amount.Value);
                 response.Say("Thank you, your payment was successful. Thank you for placing your order. Goodbye", voice: "alice", language: "en-US");
                 response.Hangup();
+            }
+            else if(record.Result == 1)
+            {
+                response.Say("The charge dit not go through. the response was, " + record.ResultMessage + ". Please try again.", voice: "alice", language: "en-US");
+                response.Redirect("/checkout/EnterCCInfo");
             }
             else if(record.ErrorMessage != null)
             {
                 response.Say(record.ErrorMessage + ". Please try again.", voice: "alice", language: "en-US");
-                response.Redirect("checkout/EnterCCInfo");
+                response.Redirect("/checkout/EnterCCInfo");
             }
             return TwiML(response);
         }
@@ -214,39 +237,7 @@ namespace BirovAm2015.Controllers
 
         private string GetYear(string year)
         {
-            return "Two Thousand " + year + ".";
-            //if(year == "17")
-            //{
-            //    return "Two Thousand Seventeen";
-            //}
-            //else if(year == "18")
-            //{
-            //    return "Two Thousand Eighteen";
-            //}
-            //else if (year == "19")
-            //{
-            //    return "Two Thousand Nineteen";
-            //}
-            //else if (year == "20")
-            //{
-            //    return "Two Thousand Twenty";
-            //}
-            //else if (year == "21")
-            //{
-            //    return "Two Thousand Twenty One";
-            //}
-            //else if (year == "22")
-            //{
-            //    return "Two Thousand Twenty Two";
-            //}
-            //else if (year == "23")
-            //{
-            //    return "Two Thousand Twenty Three";
-            //}
-            //else if (year == "24")
-            //{
-            //    return "Two Thousand ";
-            //}
+            return "Two Thousand, " + year + ".";
         }
     }
 }

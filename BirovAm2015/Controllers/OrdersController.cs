@@ -1,4 +1,5 @@
 ﻿using BirovAm.data;
+using BirovAm2015.Models;
 using Rotativa;
 using System;
 using System.Collections.Generic;
@@ -50,8 +51,11 @@ namespace BirovAm2015.Controllers
 
         public ActionResult OrderDetails(int orderId)
         {
+            var model = new OrderDetailsViewModel();
             OrdersRepository repo = new OrdersRepository();
-            return View(repo.GetOrderWithDetailsByOrderId(orderId));
+            model.Order = repo.GetOrderWithDetailsByOrderId(orderId);
+            model.Result = (string)TempData["response"];
+            return View(model);
         }
 
         public ActionResult OrderDetailsForPrint(int orderId)
@@ -183,6 +187,47 @@ namespace BirovAm2015.Controllers
         {
             var repo = new OrdersRepository();
             return View(repo.ProductsSold());
+        }
+
+        public ActionResult GetPaymentRecords(int oId)
+        {
+            var repo = new OrdersRepository();
+            var x = repo.PaymentRecordsForOrder(oId);
+            var recordJson = new List<PaymentRecord>();
+            foreach(PaymentRecord p in x)
+            {
+                recordJson.Add(new PaymentRecord
+                {
+                    PaymentRecordID = p.PaymentRecordID,
+                    TxnId = p.TxnId,
+                    ResultMessage = p.ResultMessage,
+                    CardNumber = p.CardNumber,
+                    Amount = p.Amount,
+                    TxnTime = p.TxnTime,
+                    OrderID = p.OrderID
+                });
+            }
+            return Json(recordJson, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SubmitPayment(string ccInfo, string expDate, decimal amount, string code, int oId)
+        {
+            var repo = new CheckoutRepository(ccInfo, expDate, amount, code, oId);
+            var record = repo.SubmitPayment();
+            if (record.Result == 0)
+            {
+                repo.RecordPayment(oId, record.Amount.Value);
+                TempData["response"] = "payment was successful";
+            }
+            else if (record.Result == 1)
+            {
+                TempData["response"] = "The charge dit not go through. the response was, " + record.ResultMessage;
+            }
+            else if (record.ErrorMessage != null)
+            {
+                TempData["response"] = record.ErrorMessage;
+            }
+            return Redirect("/Orders/OrderDetails?orderId=" + oId);
         }
     }
 }

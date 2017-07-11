@@ -166,7 +166,7 @@ namespace BirovAm2015.Controllers
         {
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Sales/VerifyQuantity", numDigits: 2)
-                .Say("Please enter a quantity.", voice: "alice", language: "en-US"));
+                .Say("Please enter a quantity, and then press the pound key.", voice: "alice", language: "en-US"));
             response.Redirect("/Sales/ChooseQuantity");
             return TwiML(response);
         }

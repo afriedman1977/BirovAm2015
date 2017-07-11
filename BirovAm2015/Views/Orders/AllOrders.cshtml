@@ -3,11 +3,11 @@
 <h2>AllOrders</h2>
 <div class="row" style="margin-bottom:10px">
     <div class="col-md-2"><a href="/Orders/PrintAllInvoices" class="btn btn-success">Print All Orders</a></div>
-    <div class="col-md-offset-5">
+    <div class="col-md-offset-2 col-md-4">
         <input type="text" id="search" placeholder="Phone Number" />
         <button class="btn btn-info" id="clear">Clear</button>
     </div>
-    <div><a class="btn btn-primary" href="/Orders/ProductsOrderedCount">Products Sold</a></div>
+    <div class="col-md-offset-2 col-md-2"><a class="btn btn-primary btn-block" href="/Orders/ProductsOrderedCount">Products Sold</a></div>
 </div>
 
 <table class="table table-bordered table-striped table-hover" id="orders">
@@ -18,6 +18,7 @@
         <th>Phone Number</th>
         <th>Order Date</th>
         <th>Total Cost</th>
+        <th>Amount Paid</th>
         <th>Actions</th>
         <th>Print</th>
     </tr>
@@ -33,6 +34,7 @@
                   o.Customer.PhoneNumber.Substring(6, 4))</td>
             <td>@o.OrderDate.ToShortDateString()</td>
             <td>@string.Format("{0:C}", o.TotalCost)</td>
+            <td>@string.Format("{0:C}", o.TotalAmountPaid)</td>
             <td>
                 <div class="row">
                     <div class="col-sm-4 col-sm-offset-1">

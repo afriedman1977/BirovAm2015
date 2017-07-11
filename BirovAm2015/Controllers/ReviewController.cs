@@ -51,16 +51,23 @@ namespace BirovAm2015.Controllers
             {
                 Session["customerId"] = order.Customer.CustomerID;
                 Session["orderId"] = order.OrderID;
-                if (new ReviewRepository().GettotalAmountOwed((int)Session["orderId"]) > 0)
-                {
-                    response.Gather(new Gather(action: "/Review/ChooseCheckout?number=" + digits, numDigits: 1)
-                        .Say("We see you have items that were not paid for. to checkout now, press 1. to proceed to the review menu, press 2.", voice: "alice", language: "en-US"));
-                    response.Redirect("/Review/FindOrder?digits=" + digits);
-                }
-                else
-                {
-                    response.Redirect("/Review/ReviewOptions");
-                }
+                response.Redirect("/Review/CheckForBalanceOwed");
+            }
+            return TwiML(response);
+        }
+
+        public TwiMLResult CheckForBalanceOwed()
+        {
+            var response = new VoiceResponse();
+            if (new ReviewRepository().GettotalAmountOwed((int)Session["orderId"]) > 0)
+            {
+                response.Gather(new Gather(action: "/Review/ChooseCheckout", numDigits: 1)
+                    .Say("We see you have items that were not paid for. to checkout now, press 1. to proceed to the review menu, press 2.", voice: "alice", language: "en-US"));
+                response.Redirect("/Review/CheckForBalanceOwed");
+            }
+            else
+            {
+                response.Redirect("/Review/ReviewOptions");
             }
             return TwiML(response);
         }
@@ -79,12 +86,12 @@ namespace BirovAm2015.Controllers
             return TwiML(response);
         }
 
-        public TwiMLResult ChooseCheckout(string number, string digits)
+        public TwiMLResult ChooseCheckout(string digits)
         {
             var response = new VoiceResponse();
             if(digits == "1")
             {
-                response.Redirect("Checkout/EnterCCInfo");
+                response.Redirect("/Checkout/EnterCCInfo");
             }
             else if(digits == "2")
             {
@@ -93,7 +100,7 @@ namespace BirovAm2015.Controllers
             else
             {
                 response.Say("Invalid choice");
-                response.Redirect("/Review/FindOrder?digits=" + number);
+                response.Redirect("/Review/CheckForBalanceOwed");
             }
             return TwiML(response);
         }
@@ -105,7 +112,7 @@ namespace BirovAm2015.Controllers
             var response = new VoiceResponse();
             response.Gather(new Gather(action: "/Review/ReviewChoice", numDigits: 1)
                 .Say("To review your entire order press 1, to review a specific item in your order press 2, to add an item to your order press 3,"
-                + " to return to the main menu press 4.", voice: "alice", language: "en-US"));
+                + "to checkout items in your cart that were not paid for yet press 4, to return to the main menu press 5.", voice: "alice", language: "en-US"));
             response.Redirect("/Review/ReviewOptions");
             return TwiML(response);
 
@@ -126,7 +133,11 @@ namespace BirovAm2015.Controllers
             {
                 response.Redirect("/Welcome/ChooseItem");
             }
-            else if (digits == "4")
+            else if(digits == "4")
+            {
+                response.Redirect("/Checkout/EnterCCInfo");
+            }
+            else if (digits == "5")
             {
                 response.Redirect("/Welcome/Welcome", method: "GET");
             }
@@ -159,8 +170,8 @@ namespace BirovAm2015.Controllers
                 response.Gather(new Gather(action: "/Review/ChooseEdit", numDigits: 1)
                     .Say("you chose " + orderDetails[(int)Session["Index"]].Quantity + ", " + orderDetails[(int)Session["Index"]].Product.Description + ", size " + orderDetails[(int)Session["Index"]].Size.Size1
                     + ". to change the quantity press 1, to change the size press 2, to delete this item from your cart "
-                    + "press 3, to hear the next item in your cart press 4, to return to the previous menu press 5, to return to "
-                    + "the main menu press 6.", voice: "alice", language: "en-US"));
+                    + "press 3, to hear the next item in your cart press 4, to checkout press 5, to return to the previous menu press 6, to return to "
+                    + "the main menu press 7.", voice: "alice", language: "en-US"));
                 response.Redirect("/Review/ReviewEntireOrder");
             }
             return TwiML(response);
@@ -189,11 +200,15 @@ namespace BirovAm2015.Controllers
                 Session["Index"] = x;
                 response.Redirect("/Review/ReviewEntireOrder");
             }
-            else if (digits == "5")
+            else if(digits == "5")
+            {
+                response.Redirect("/Checkout/EnterCCInfo");
+            }
+            else if (digits == "6")
             {
                 response.Redirect("/Review/ReviewOptions");
             }
-            else if (digits == "6")
+            else if (digits == "7")
             {
                 response.Redirect("/Welcome/Welcome", method: "GET");
             }
@@ -347,7 +362,7 @@ namespace BirovAm2015.Controllers
             OrderDetail od = repo.GetOrderDetailByOrderDetailId((int)Session["OrderDetailID"]);
             respone.Gather(new Gather(action: "/Review/ConfirmDelete", numDigits: 1)
                 .Say("You chose to delete " + od.Product.Description + " ,size " + od.Size.Size1 + " , from your order. to confirm press 1. to cancel "
-                + "press2", voice: "alice", language: "en-US"));
+                + "press 2", voice: "alice", language: "en-US"));
             respone.Redirect("/Review/ChooseDelete");
             return TwiML(respone);
         }

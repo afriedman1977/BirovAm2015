@@ -29,7 +29,7 @@ namespace BirovAm.data
         private string _ccNumber;
         private string _expDate;
         private decimal _amount;
-        private string _zip;
+       // private string _zip;
         private string _cvv;
         private int _oId;
 
@@ -51,7 +51,7 @@ namespace BirovAm.data
                 result.ApprovalCode = xmlDoc.Root.Element("ssl_approval_code").Value;
                 result.ResultMessage = xmlDoc.Root.Element("ssl_result_message").Value;
                 result.CardNumber = xmlDoc.Root.Element("ssl_card_number").Value;
-                result.TxnTime = xmlDoc.Root.Element("ssl_txn_time").Value;
+                result.TxnTime = DateTime.Parse(xmlDoc.Root.Element("ssl_txn_time").Value);
             }
             else
             {
@@ -90,18 +90,18 @@ namespace BirovAm.data
             }
         }
 
-        public void RecordPayment(int oId, decimal cost, decimal paid)
+        public void RecordPayment(int oId, decimal paid)
         {
             using (var ctx = new BirovAmContext())
             {
                 var order = ctx.Orders.Where(o => o.OrderID == oId).FirstOrDefault();
-                order.TotalAmountPaid = paid;
+                order.TotalAmountPaid += paid;
                 List<OrderDetail> details = ctx.OrderDetails.Where(od => od.OrderID == oId && od.DeleteFlag != true).ToList();
                 foreach(OrderDetail d in details)
                 {
                     if(paid > 0)
                     {
-                        if(d.AmountPaid < d.Price)
+                        if(d.AmountPaid == null || d.AmountPaid < d.Price)
                         {
                             var amountOwed = d.Price - d.AmountPaid;
                             d.AmountPaid = paid > amountOwed ? d.AmountPaid + amountOwed : d.AmountPaid + paid;

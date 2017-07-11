@@ -1,24 +1,35 @@
-﻿@using BirovAm.data;
-@model Order
+﻿@using BirovAm2015.Models;
+@using BirovAm.data;
+@model OrderDetailsViewModel
 
 <div id="order-details">
-    <h2>OrderDetails for Order Number - @Model.OrderID</h2>
+    @if(Model.Result != null)
+    {
+        <div class="alert alert-warning alert-dismissable" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 style="text-align:center">@Model.Result</h4>
+        </div>
+    }
+    <h2>OrderDetails for Order Number - @Model.Order.OrderID</h2>
     <br />
     <h2>{{notice}}</h2>
-    <h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
-    <h4>Address - @Model.Customer.Address</h4>
+    <h4>Name - @Model.Order.Customer.FirstName @Model.Order.Customer.LastName</h4>
+    <h4>Address - @Model.Order.Customer.Address</h4>
     <h4>
         Phone Number - @string.Format("({0}) {1}-{2}",
-                  Model.Customer.PhoneNumber.Substring(0, 3),
-                  Model.Customer.PhoneNumber.Substring(3, 3),
-                  Model.Customer.PhoneNumber.Substring(6, 4))
+                  Model.Order.Customer.PhoneNumber.Substring(0, 3),
+                  Model.Order.Customer.PhoneNumber.Substring(3, 3),
+                  Model.Order.Customer.PhoneNumber.Substring(6, 4))
     </h4>
     <br />
 
     <div class="row">
-        <div class="col-md-2"><a href="/Orders/PrintInvoice?orderId=@Model.OrderID" class="btn btn-success">Print</a></div>
+        <div class="col-md-2"><a href="/Orders/PrintInvoice?orderId=@Model.Order.OrderID" class="btn btn-success btn-block">Print</a></div>
         <div class="col-md-4 col-md-offset-2" style="margin-bottom:10px">
             <button class="btn btn-primary btn-block" id="add-item" v-on:click="addItem()">Add Item</button>
+        </div>
+        <div class="col-md-2 col-md-offset-2">
+            <button class="btn btn-info btn-block" id="see-add-payments" v-on:click="getPaymentRecords(@Model.Order.OrderID)">Payments</button>
         </div>
     </div>
     <table class="table table-bordered table-hover table-striped">
@@ -29,16 +40,17 @@
             <th>Price</th>
             <th>Quantity</th>
             <th>Total Price</th>
+            <th>Amount Paid</th>
             <th>Actions</th>
         </tr>
-        @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode).ThenBy(d => d.Size.SizeID))
+        @foreach (OrderDetail od in Model.Order.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode).ThenBy(d => d.Size.SizeID))
         {
             <tr data-orderDetail-id="@od.OrderDetailID">
                 <td>@od.Product.ProductCode</td>
                 <td>@od.Product.Description</td>
                 <td v-if="edit != @od.OrderDetailID">@od.Size.Size1</td>
                 <td v-else>
-                    <select class="form-control" v-model="selectedSize" v-on:change="updateSize(@od.OrderDetailID, @Model.OrderID)">
+                    <select class="form-control" v-model="selectedSize" v-on:change="updateSize(@od.OrderDetailID, @Model.Order.OrderID)">
                         <option v-for="size in Sizes" v-bind:value="size.SizeID">
                             {{size.Size1}}
                         </option>
@@ -54,14 +66,15 @@
                     </select>
                 </td>
                 <td>@string.Format("{0:C}", od.Price) </td>
+                <td>@string.Format("{0:C}", od.AmountPaid) </td>
                 <td>
-                    <div class="row" style="width:100px">
+                    <div class="row" style="width:150px">
                         <div class="col-md-5" v-if="edit != @od.OrderDetailID"> <button class="btn btn-primary editOrderDetail" v-on:click="editItem(@od.Product.ProductID,@od.Size.SizeID,@od.OrderDetailID,@od.Quantity)">Edit</button></div>
                         <div class="col-md-5" v-else><button class="btn btn-primary" v-on:click="cancel">Cancel</button></div>
-                        <div class="col-md-5 col-md-offset-2" v-if="edit != @od.OrderDetailID">
+                        <div class="col-md-5 col-md-offset-1" v-if="edit != @od.OrderDetailID">
                             <form action="/Orders/DeleteOrderDetail" method="POST" id="delete-orderDetail">
                                 <input type="hidden" name="odId" value="@od.OrderDetailID" />
-                                <input type="hidden" name="oId" value="@Model.OrderID"/>
+                                <input type="hidden" name="oId" value="@Model.Order.OrderID" />
                                 <button class="btn btn-danger delete-orderDetail">Delete</button>
                             </form>
                         </div>
@@ -71,8 +84,9 @@
         }
     </table>
 
-    <h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
-    <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.TotalCost)</h4>
+    <h4 style="text-align:right">Total Items = @Model.Order.TotalQuantity</h4>
+    <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.Order.TotalCost)</h4>
+    <h4 style="text-align:right; margin-bottom:40px">Total Paid = @string.Format("{0:C}", Model.Order.TotalAmountPaid)</h4>
 
     <div class="modal fade" tabindex="-1" role="dialog" id="add-item-modal">
         <div class="modal-dialog">
@@ -85,7 +99,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="style-number">Product</label>
-                            <select class="form-control" v-model="selectedProduct" v-on:change="addSize(@Model.OrderID)" name="ProductID" id="style-number">
+                            <select class="form-control" v-model="selectedProduct" v-on:change="addSize(@Model.Order.OrderID)" name="ProductID" id="style-number">
                                 <option v-for="product in Products" v-bind:value="product.ProductID">
                                     {{product.StyleNumber}}
                                 </option>
@@ -108,13 +122,75 @@
                             </select>
                         </div>
                     </div>
-                    <input type="hidden" name="OrderID" value="@Model.OrderID"/>
+                    <input type="hidden" name="OrderID" value="@Model.Order.OrderID" />
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         <button class="btn btn-primary" id="submit-add-item">Add Item</button>
                     </div>
                 </div>
             </form><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="payments-modal">
+        <div class="modal-dialog modal-lg" style="width:1080px">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="clearPaymentModal()"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title-category">Payments</h4>
+                    <h3 style="text-align:center; font:900">Total cost for this order is @string.Format("{0:C}", Model.Order.TotalCost) Total outstanding is @string.Format("{0:C}", Model.Order.TotalCost - Model.Order.TotalAmountPaid)</h3>
+
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-hover table-striped">
+                        <tr>
+                            <th>Txn ID</th>
+                            <th>Result</th>
+                            <th>Card Number</th>
+                            <th>Time</th>
+                            <th>Amount</th>
+                        </tr>
+                        <tr v-for="record in PaymentRecords">
+                            <td>{{record.TxnId}}</td>
+                            <td>{{record.ResultMessage}}</td>
+                            <td>{{record.CardNumber}}</td>
+                            <td>{{getDate(record.TxnTime)}}</td>
+                            <td>{{record.Amount | currency}}</td>
+                        </tr>
+                    </table>
+                    <div class="row" v-if="!addingPayment">
+                        <div class="col-md-2 col-md-offset-5">
+                            <button class="btn btn-primary" style="text-align:center" v-on:click="addingPayment = true">Add Payment</button>
+                        </div>
+                    </div>
+                    <form method="POST" action="/Orders/SubmitPayment" v-if="addingPayment">
+                        <div class="form-inline">
+                            <div class="form-group" style="margin-bottom:15px">
+                                <label for="cc-Info">CC Number</label>
+                                <input type="text" class="form-control" id="cc-Info" v-model="ccInfo" name="ccInfo" placeholder="Credit Card Number" />
+                                <label for="exp-Date">Exp Date</label>
+                                <input type="text" class="form-control" id="exp-Date" v-model="expDate" name="expDate" placeholder="xxxx" />
+                                <label for="code">Cvv</label>
+                                <input type="password" class="form-control" id="code" v-model="code" name="code" placeholder="xxx" />
+                                <label for="amount">Amount</label>
+                                <input type="text" class="form-control" id="amount" v-model="amount" name="amount" placeholder="0.00" />
+                                <input type="hidden" id="oId" name="oId" value="@Model.Order.OrderID" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-md-offset-5">
+                                <button class="btn btn-primary" style="text-align:center" id="submit-add-item" v-on:click="addingPayment = false">Submit Payment</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="clearPaymentModal()">Close</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 </div>

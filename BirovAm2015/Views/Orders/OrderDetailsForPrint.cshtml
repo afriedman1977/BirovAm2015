@@ -15,45 +15,48 @@
     <title>OrderDetailsForPrint</title>
 </head>
 <body>
- 
-<h2>Order Number - @Model.OrderID</h2>
-<br />
 
-<h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
-<h4>Address - @Model.Customer.Address</h4>
-<h4>Phone Number - @string.Format("({0}) {1}-{2}", 
-                  Model.Customer.PhoneNumber.Substring(0,3), 
-                  Model.Customer.PhoneNumber.Substring(3, 3), 
-                  Model.Customer.PhoneNumber.Substring(6,4))</h4>
-<br />
-
-<table class="table">
-    <tr>
-        <th>Item</th>
-        <th>Description</th>
-        <th>Size</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Total Price</th>
-    </tr>
-    @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode))
-    {
-        <tr>
-            <td>@od.Product.ProductCode</td>
-            <td>@od.Product.Description</td>
-            <td>@od.Size.Size1</td>
-            <td>@string.Format("{0:C}", od.Product.Price)</td>
-            <td>@od.Quantity</td>
-            <td>@string.Format("{0:C}", od.Price)</td>
-        </tr>
-    }
-</table>
-
-<h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
+    <h2>Order Number - @Model.OrderID</h2>
     <br />
-<h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.TotalCost)</h4>
 
-   
+    <h4>Name - @Model.Customer.FirstName @Model.Customer.LastName</h4>
+    <h4>Address - @Model.Customer.Address</h4>
+    <h4>
+        Phone Number - @string.Format("({0}) {1}-{2}",
+                  Model.Customer.PhoneNumber.Substring(0, 3),
+                  Model.Customer.PhoneNumber.Substring(3, 3),
+                  Model.Customer.PhoneNumber.Substring(6, 4))
+    </h4>
+    <br />
+
+    <table class="table">
+        <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+        </tr>
+        @foreach (OrderDetail od in Model.OrderDetails.Where(d => d.DeleteFlag != true).OrderBy(d => d.Product.ProductCode))
+        {
+            <tr>
+                <td>@od.Product.ProductCode</td>
+                <td>@od.Product.Description</td>
+                <td>@od.Size.Size1</td>
+                <td>@string.Format("{0:C}", od.Product.Price)</td>
+                <td>@od.Quantity</td>
+                <td>@string.Format("{0:C}", od.Price)</td>
+            </tr>
+        }
+    </table>
+
+    <h4 style="text-align:right">Total Items = @Model.TotalQuantity</h4>
+    <br />
+    <h4 style="text-align:right">Total Cost = @string.Format("{0:C}", Model.TotalCost)</h4>
+    <h4 style="text-align:right">Total Paid = @string.Format("{0:C}", Model.TotalAmountPaid)</h4>
+
+
 
 </body>
 </html>

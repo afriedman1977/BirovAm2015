@@ -5,12 +5,19 @@
         Products: [],
         Sizes: [],
         Quantities: [],
+        PaymentRecords: [],
         edit: false,
         selectedProduct: null,
         selectedSize: null,
         selectedQty: null,
         stock: null,
-        notice: null
+        notice: null,
+        addingPayment: false,
+        ccInfo: null,
+        expDate: null,
+        code: null,
+        amount: null,
+        response: null
     },
 
     methods: {
@@ -92,6 +99,35 @@
             this.edit = null;
             this.Sizes = [];
             this.Quantities = [];
+        },
+
+        getPaymentRecords: function (oId) {
+            this.response = null;
+            var self = this;
+            $.get("/Orders/GetPaymentRecords", { oId: oId }, function (records) {
+                self.PaymentRecords = records;
+            })
+        },
+
+        getDate: function(date){
+            return new Date(parseInt(date.substr(6))).toLocaleDateString('en-us');
+        },
+
+        submitPayment: function (oId) {
+            this.response = null;
+            var self = this;
+            $.post("/Orders/SubmitPayment", { ccInfo: self.ccInfo, expDate: self.expDate, amount: self.amount, code: self.code, oId: oId }, function (response) {
+                this.response = response;
+                this.clearPaymentModal();
+            })
+        },
+
+        clearPaymentModal: function () {
+            this.ccInfo = null;
+            this.expDate = null;
+            this.code = null;
+            this.amount = null;
+            this.addingPayment = false;
         }
     }
 })
@@ -102,6 +138,13 @@ $(function () {
         //$("#submit-add").show();
         //$(".modal-title").text("Add Item");
         $("#add-item-modal").modal();
+    });
+
+    $("#see-add-payments").click(function () {
+        // clearProductModal();
+        //$("#submit-add").show();
+        //$(".modal-title").text("Add Item");
+        $("#payments-modal").modal();
     });
 
     $(".delete-orderDetail").click(function () {
