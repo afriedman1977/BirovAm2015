@@ -1,61 +1,65 @@
 ﻿@using BirovAm.data;
 @model List<ProductsSold>
 
-<h2>ProductsOrderedCount</h2>
+<div id="products-ordered-count">
+    <h3 style="text-align:center">Products Ordered Count</h3>
 
-<table class="table table-bordered table-striped table-hover">
-    <tr>
-        <th>Product</th>
-        <th>Size</th>
-        <th>Amount Sold</th>
-    </tr>
-    @foreach(ProductsSold ps in Model.OrderBy(p => p.ProductCode).ThenBy(p => p.Size))
-    {
-        <tr>
-            <td>@ps.ProductCode</td>
-            <td>@ps.Size</td>
-            <td>@ps.AmountSold</td>
-        </tr>
-    }
-</table>
+    <div class="row" style="margin-bottom:15px">
+        <div class="col-md-offset-4 col-md-8 form-inline">
+            <input type="text" class="form-control" id="search-item" placeholder="Item Code" />
+            <input type="text" class="form-control" id="search-size" placeholder="Size" />
+            <button class="btn btn-info" id="clear">Clear</button>
+        </div>
+    </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="add-customer-modal">
-    <div class="modal-dialog">
-        <form method="POST" action="/Customers/AddCustomer" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-offset-3 col-md-7">
+            <table class="table table-bordered table-striped table-hover" id="products-count">
+                <tr>
+                    <th>Product</th>
+                    <th>Size</th>
+                    <th>Amount Sold</th>
+                </tr>
+                @foreach (ProductsSold ps in Model.OrderBy(p => p.ProductCode).ThenBy(p => p.Size))
+               {
+                    <tr>
+                        <td class="order-modal" v-on:click="getOrderNumbers(@ps.ProductCode)"><a href="#">@ps.ProductCode</a></td>
+                        <td class="order-modal" v-on:click="getOrderNumbers(@ps.ProductCode,@ps.SizeID)"><a href="#">@ps.Size</a></td>
+                        <td>@ps.AmountSold</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="products-ordered-modal">
+        <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Modal title</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="style-number">First Name</label>
-                        <input type="text" class="form-control" name="FirstName" id="first-name" placeholder="First Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="style-number">Last Name</label>
-                        <input type="text" class="form-control" name="LastName" id="last-name" placeholder="Last Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="brand">Address</label>
-                        <input type="text" class="form-control" name="Address" id="address" placeholder="Address" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Phone Number</label>
-                        <input type="text" class="form-control" name="PhoneNumber" id="phone-number" placeholder="Phone Number" required>
-                    </div>
-
-                    <input type="hidden" id="customer-id" value="" name="CustomerID" />
-                    <input type="hidden" id="Message-URL" value="" name="MessageURL" />
+                    <table class="table table-bordered table-bordered table-hover">
+                        <tr>
+                            <th>Order Number</th>
+                        </tr>
+                        <tr v-for="number in orderNumbers">
+                            <td><a href="/Orders//OrderDetails?orderId={{number}}">{{number}}</a></td>
+                        </tr>
+                    </table>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button class="btn btn-primary" id="submit-add">Add Customer</button>
-                        <button class="btn btn-primary" id="submit-edit" formaction="/Customers/EditCustomer">Edit Customer</button>
                     </div>
                 </div>
             </div>
-        </form><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+            <!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+
+@section scripts{
+    <script src="~/Scripts/AllOrdersCount.js"></script>
+}
 

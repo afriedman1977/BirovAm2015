@@ -10,6 +10,7 @@ namespace BirovAm.data
     {
         public string ProductCode { get; set; }
         public string Size { get; set; }
+        public int SizeID { get; set; }
         public int? AmountSold { get; set; }
     }
 }

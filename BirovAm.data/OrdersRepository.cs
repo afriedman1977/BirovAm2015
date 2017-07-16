@@ -71,7 +71,7 @@ namespace BirovAm.data
             {
                 var sizes = ctx.Sizes.Where(s => s.ProductsSizes.Any(ps => ps.ProductID == productId && ps.Stock > 5) && s.DeleteFlag != true).ToList();
                 var details = ctx.OrderDetails.Where(od => od.OrderID == oId && od.DeleteFlag != true).ToList();
-                return sizes.Where(s => !(details.Any(od => od.SizeID == s.SizeID))).ToList();
+                return sizes.Where(s => !(details.Any(od => od.ProductID == productId && od.SizeID == s.SizeID))).ToList();
             }
         }
 
@@ -129,12 +129,28 @@ namespace BirovAm.data
                     {
                         ProductCode = prs.Product.ProductCode,
                         Size = prs.Size.Size1,
+                        SizeID = prs.SizeID,
                         AmountSold = Sum(prs.ProductID, prs.SizeID)
                         //ctx.OrderDetails.Where(od => od.ProductID == prs.ProductID && od.SizeID == prs.SizeID && od.DeleteFlag != true).Sum(od => od.Quantity.Value) > 0?
                         //ctx.OrderDetails.Where(od => od.ProductID == prs.ProductID && od.SizeID == prs.SizeID && od.DeleteFlag != true).Sum(od => od.Quantity.Value): 0
                     });
                 }
                 return ps;
+            }
+        }
+
+        public List<int> OrdersThatContainProduct(string pCode, int? size = null)
+        {
+            using (var ctx = new BirovAmContext())
+            {
+                if (size == null)
+                {
+                    return ctx.Orders.Where(o => o.DeleteFlag != true && o.OrderDetails.Where(od => od.DeleteFlag != true).Any(od => od.Product.ProductCode == pCode)).Select(x => x.OrderID).ToList();
+                }
+                else
+                {
+                    return ctx.Orders.Where(o => o.DeleteFlag != true && o.OrderDetails.Where(od => od.DeleteFlag != true).Any(od => od.Product.ProductCode == pCode && od.SizeID == size)).Select(x => x.OrderID).ToList();
+                }
             }
         }
 

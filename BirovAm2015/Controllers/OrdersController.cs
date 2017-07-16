@@ -189,6 +189,13 @@ namespace BirovAm2015.Controllers
             return View(repo.ProductsSold());
         }
 
+        public ActionResult OrdersThatHaveProduct(string code, int? size = null)
+        {
+            var repo = new OrdersRepository();
+            var orders = repo.OrdersThatContainProduct(code, size);
+            return Json(orders, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult GetPaymentRecords(int oId)
         {
             var repo = new OrdersRepository();
