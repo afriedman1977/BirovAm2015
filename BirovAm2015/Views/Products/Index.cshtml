@@ -23,6 +23,7 @@
         <th>Category</th>
         <th>Sizes</th>
         <th>Price</th>
+        <th>Details</th>
         <th>Actions</th>
     </tr>
 
@@ -42,14 +43,17 @@
             </td>
             <td>@p.Price.ToString("C")</td>
             <td>
+                <a href="/Products/GetDetails?id=@p.ProductID" class="btn btn-sm btn-info details">Details</a>
+            </td>
+            <td style="width:120Px">
                 <div class="row">
-                    <div class="col-md-1" style="margin-left:-5px">
+                    <div class="col-md-5" style="margin-left:-5px">
                         <button class="btn btn-sm btn-warning editProduct">Edit</button>
                     </div>
-                    <div class="col-md-1 col-md-offset-1">
-                        <a href="/Products/GetDetails?id=@p.ProductID" class="btn btn-sm btn-info details">Details</a>
-                    </div>
-                    <div class="col-md-1 col-md-offset-2">
+                    @*<div class="col-md-1 col-md-offset-1">
+                        
+                    </div>*@
+                    <div class="col-md-5">
                         <form action="/Products/DeleteProduct" method="POST" id="delete-form">
                             <input type="hidden" name="id" value="@p.ProductID" />
                             <button class="btn btn-sm btn-danger delete-product">Delete</button>
@@ -102,7 +106,7 @@
                     <div class="form-inline row">
                         <div class="form-group col-md-4">
                             <label for="category">Category</label>
-                            <select id="category" name="CategoryID">
+                            <select id="category" name="CategoryID" class="form-control">
                                 @foreach (Category c in Model.Categories.Where(c => c.DeleteFlag != true))
                                 {
                                     <option value="@c.CategoryID" data-category-id="@c.CategoryID">@c.CategoryName</option>

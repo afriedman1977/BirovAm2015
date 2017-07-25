@@ -26,6 +26,25 @@ namespace BirovAm2015.Controllers
             return View(repo.AllCategories());
         }
 
+        public ActionResult JsonCategories()
+        {
+            var repo = new ProductsRepository();
+            var cats = repo.AllCategories();
+            var jsonCats = new List<Category>();
+            foreach(Category cat in cats)
+            {
+                Category c = new Category
+                {
+                    CategoryID = cat.CategoryID,
+                    CategoryName = cat.CategoryName,
+                    CategoryDescription = cat.CategoryDescription,
+                    DeleteFlag = cat.DeleteFlag
+                };
+                jsonCats.Add(c);
+            }
+            return Json(jsonCats, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         public ActionResult AddCategory(Category c)
         {

@@ -15,6 +15,7 @@
     });
 
     $("#add-size").click(function () {
+        clearCategories();
         $("#submit-add-size").show();
         $("#submit-edit-size").hide();
         $(".modal-title-category").text("Add Category");
@@ -41,6 +42,7 @@
     });
 
     $(".editSize").click(function () {
+        clearCategories()
         var id = $(this).closest('tr').data('size-id');
         $.get("/Products/GetSizeById?id=" + id, function (result) {
             $("#size-code").val(result.SizeCode)
@@ -92,6 +94,14 @@
         cats.forEach(function (c) {
             $("#category-" + c.CategoryID).attr("checked", true);
         });
+    }
+
+    function clearCategories() {
+        $.get("/Products/JsonCategories", function (result) {
+            result.forEach(function (c) {
+                $("#category-" + c.CategoryID).attr("checked", false);
+            });
+        })
     }
 
     function clearProductModal() {
